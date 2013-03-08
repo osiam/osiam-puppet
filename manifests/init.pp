@@ -33,6 +33,11 @@ class osiam (
 ) {
     case $ensure {
         present: {
+            $repository = $version ? {
+                /.*-SNAPSHOT$/ => 'http://repo.osiam.org/snapshots',
+                default       => 'http://repo.osiam.org/releases',
+            }
+
             maven { 'authorization-server':
                 ensure     => $ensure,
                 path       => "${webappsdir}/authorization-server.war",
@@ -40,7 +45,7 @@ class osiam (
                 artifactid => 'authorization-server',
                 version    => $version,
                 packaging  => 'war',
-                repos      => 'http://repo.osiam.org/snapshots'
+                repos      => $repository,
             }
 
             maven { 'oauth2-client':
@@ -50,7 +55,7 @@ class osiam (
                 artifactid => 'oauth2-client',
                 version    => $version,
                 packaging  => 'war',
-                repos      => 'http://repo.osiam.org/snapshots'
+                repos      => $repository,
             }
         }
         absent: {
