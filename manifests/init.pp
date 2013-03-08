@@ -37,9 +37,31 @@ class osiam (
 ) {
     case $ensure {
         present: {
-            $repository = $version ? {
-                /.*-SNAPSHOT$/ => 'http://repo.osiam.org/snapshots',
-                default       => 'http://repo.osiam.org/releases',
+            case $version {
+                /.*-SNAPSHOT$/: {
+                    $repository = 'http://repo.osiam.org/snapshots'
+                    $path = "${repository}/org/osiam/ng/authorization-server/${version}"
+
+                    exec { 'checkauthorizationserverwar':
+                        path     => '/bin:/usr/bin',
+                        command  => "rm -rf ${webappsdir}/authorization-server{,.war}",
+                        before  => Maven['authorization-server'],
+                        unless   => "test \
+                            \"$(curl -s ${path}/$(wget -O- ${path} 2>&1 | grep '.war' | grep '.md5' | sed -e 's/.*href=\"\\(.*md5\\)\">.*$/\1/' | sed 's/\\.\\.//' | tail -n 1))\" = \
+                            \"$(md5sum ${webappsdir}/authorization-server.war | awk -F' ' '{ print \$1 }')\""
+                    }
+                    exec { 'checkoauth2clientwar':
+                        path    => '/bin:/usr/bin',
+                        command => "rm -rf ${webappsdir}/oauth2-client{,.war}",
+                        before  => Maven['oauth2-client'],
+                        unless  => "test \
+                            \"$(curl -s ${path}/$(wget -O- ${path} 2>&1 | grep '.war' | grep '.md5' | sed -e 's/.*href=\"\\(.*md5\\)\">.*$/\1/' | sed 's/\\.\\.//' | tail -n 1))\" = \
+                            \"$(md5sum ${webappsdir}/oauth2-client.war | awk -F' ' '{ print \$1 }')\"",
+                    }
+                }
+                default: {
+                    $repository = 'http://repo.osiam.org/releases'
+                }
             }
 
             maven { 'authorization-server':
@@ -69,6 +91,7 @@ class osiam (
                 command     => "chown ${owner}:${group} ${webappsdir}/authorization-server.war ${webappsdir}/oauth2-client.war",
                 refreshonly => true,
             }
+
         }
         absent: {
             file { "${webappsdir}/authorization-server.war":
