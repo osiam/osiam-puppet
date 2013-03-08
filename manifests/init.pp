@@ -29,7 +29,9 @@
 class osiam (
     $ensure,
     $version,  
-    $webappsdir
+    $webappsdir,
+    $owner,
+    $group,
 ) {
     case $ensure {
         present: {
@@ -46,6 +48,7 @@ class osiam (
                 version    => $version,
                 packaging  => 'war',
                 repos      => $repository,
+                notify     => Exec['permissions'],
             }
 
             maven { 'oauth2-client':
@@ -56,6 +59,13 @@ class osiam (
                 version    => $version,
                 packaging  => 'war',
                 repos      => $repository,
+                notify     => Exec['permissions'],
+            }
+
+            exec { 'permissions':
+                path        => '/bin',
+                command     => "chown ${owner}:${group} ${webappsdir}/authorization-server.war ${webappsdir}/oauth2-client.war",
+                refreshonly => true,
             }
         }
         absent: {
@@ -84,5 +94,4 @@ class osiam (
             fail("Ensure value not valid. Use 'present' or 'absent'")
         }
     }
-
 }
