@@ -3,9 +3,11 @@
 # This class deploys the osiam war(s) into an existinc application server.
 #
 # Parameters:
-#   [*ensure*]      - Wether to install or remove osiam. Valid arguments are absent or present
-#   [*version*]     - Version of osiam artifacts to deploy
+#   [*ensure*]      - Wether to install or remove osiam. Valid arguments are absent or present.
+#   [*version*]     - Version of osiam artifacts to deploy.
 #   [*webappsdir]   - Tomcat7 webapps directory path.
+#   [*owner*]       - Artifact owner on filesystem.
+#   [*group*]       - Artifact group on filesystem.
 #
 # Actions:
 #
@@ -30,8 +32,8 @@ class osiam (
     $ensure,
     $version,  
     $webappsdir,
-    $owner,
-    $group,
+    $owner          = 'tomcat',
+    $group          = 'tomcat',
 ) {
     case $ensure {
         present: {
