@@ -40,14 +40,15 @@ class osiam (
             case $version {
                 /.*-SNAPSHOT$/: {
                     $repository = 'http://repo.osiam.org/snapshots'
-                    $path = "${repository}/org/osiam/ng/authorization-server/${version}"
+                    $aspath = "${repository}/org/osiam/ng/authorization-server/${version}"
+                    $ocpath = "${repository}/org/osiam/ng/oauth2-client/${version}"
 
                     exec { 'checkauthorizationserverwar':
                         path     => '/bin:/usr/bin',
                         command  => "rm -rf ${webappsdir}/authorization-server{,.war}",
                         before  => Maven['authorization-server'],
                         unless   => "test \
-                            \"$(curl -s ${path}/$(wget -O- ${path} 2>&1 | grep '.war' | grep '.md5' | sed -e 's/.*href=\"\\(.*md5\\)\">.*$/\1/' | sed 's/\\.\\.//' | tail -n 1))\" = \
+                            \"$(curl -s ${aspath}/$(wget -O- ${aspath} 2>&1 | grep '.war' | grep '.md5' | sed -e 's/.*href=\"\\(.*md5\\)\">.*$/\1/' | sed 's/\\.\\.//' | tail -n 1))\" = \
                             \"$(md5sum ${webappsdir}/authorization-server.war | awk -F' ' '{ print \$1 }')\""
                     }
                     exec { 'checkoauth2clientwar':
@@ -55,7 +56,7 @@ class osiam (
                         command => "rm -rf ${webappsdir}/oauth2-client{,.war}",
                         before  => Maven['oauth2-client'],
                         unless  => "test \
-                            \"$(curl -s ${path}/$(wget -O- ${path} 2>&1 | grep '.war' | grep '.md5' | sed -e 's/.*href=\"\\(.*md5\\)\">.*$/\1/' | sed 's/\\.\\.//' | tail -n 1))\" = \
+                            \"$(curl -s ${ocpath}/$(wget -O- ${ocpath} 2>&1 | grep '.war' | grep '.md5' | sed -e 's/.*href=\"\\(.*md5\\)\">.*$/\1/' | sed 's/\\.\\.//' | tail -n 1))\" = \
                             \"$(md5sum ${webappsdir}/oauth2-client.war | awk -F' ' '{ print \$1 }')\"",
                     }
                 }
