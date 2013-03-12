@@ -43,6 +43,7 @@ class osiam (
                     $aspath = "${repository}/org/osiam/ng/authorization-server/${version}"
                     $ocpath = "${repository}/org/osiam/ng/oauth2-client/${version}"
 
+                    # delete war files if there is a newer version
                     exec { 'checkauthorizationserverwar':
                         path     => '/bin:/usr/bin',
                         command  => "rm -rf ${webappsdir}/authorization-server{,.war}",
@@ -99,21 +100,9 @@ class osiam (
                 ensure => absent,
                 backup  => false,
             }
-            file { "${webappsdir}/authorization-server":
-                ensure  => absent,
-                force   => true,
-                backup  => false,
-                require => File["${webappsdir}/authorization-server.war"],
-            }
             file { "${webappsdir}/oauth2-client.war":
                 ensure => absent,
                 backup  => false,
-            }
-            file { "${webappsdir}/oauth2-client":
-                ensure  => absent,
-                force   => true,
-                backup  => false,
-                require => File["${webappsdir}/oauth2-client.war"],
             }
         }
         default: {
