@@ -1,6 +1,6 @@
 # Class: osiam
 #
-# This class deploys the osiam war(s) into an existinc application server.
+# This class deploys the osiam war(s) into an existing application server.
 #
 # Parameters:
 #   [*ensure*]      - Wether to install or remove osiam. Valid arguments are absent or present.
