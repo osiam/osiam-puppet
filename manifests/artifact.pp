@@ -55,7 +55,7 @@ define osiam::artifact {
             }
         }
         absent: {
-            file { "${webappsdir}/${name}.war":
+            file { "${osiam::webappsdir}/${name}.war":
                 ensure => absent,
                 backup  => false,
             }
