@@ -48,6 +48,7 @@ class osiam (
     $webappsdir     = '/var/lib/tomcat7/webapps',
     $owner          = 'tomcat',
     $group          = 'tomcat',
+    $tomcatservice  = 'tomcat7',
     $homedir        = '/etc/osiam',
     $dbforceschema  = false,
 ) {
@@ -106,6 +107,7 @@ class osiam (
                     refreshonly => true,
                     subscribe   => Exec["extract-install-schema"],
                     before      => Exec['install-schema'],
+                    notify      => Service[$tomcatservice],
                 }
             }
             # Check if table scim_meta existsi and dump install-schema.sql if it's missing
@@ -117,6 +119,7 @@ class osiam (
                 unless      => "psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w -c \
                                 'select * from scim_meta'",
                 require     => Exec["extract-install-schema"],
+                notify      => Service[$tomcatservice],
             }
         }
         absent: {
