@@ -61,6 +61,14 @@ class osiam (
         group  => 'root',
     }
 
+      file { 'db-config.properties':
+        path    => '$homedir/db-config.properties',
+        ensure  => file,
+        require => Package['$tomcatservice'],
+        content => template('osiam/db-config.properties.erb'),
+        notify => Service['$tomcatservice']
+      }
+
     case $ensure {
         present: {
             # Check if there is a new init.sql script inside the authorization-server.war and
