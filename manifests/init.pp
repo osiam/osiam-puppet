@@ -39,13 +39,13 @@
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
 class osiam (
-    $ensure,
     $version,  
-    $webappsdir,
-    $dbhost,
     $dbuser,
     $dbpassword,
     $dbname,
+    $dbhost         = $::fqdn,
+    $ensure         = present,
+    $webappsdir     = '/var/lib/tomcat7/webapps',
     $owner          = 'tomcat',
     $group          = 'tomcat',
     $homedir        = '/etc/osiam',
