@@ -64,9 +64,8 @@ class osiam (
       file { 'db-config.properties':
         path    => "${homedir}/db-config.properties",
         ensure  => $osiam::ensure,
-        require => Package['$tomcatservice'],
         content => template('osiam/db-config.properties.erb'),
-        notify => Service['$tomcatservice']
+        notify => Service[$tomcatservice]
       }
 
     case $ensure {
