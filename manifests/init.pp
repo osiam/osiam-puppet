@@ -52,96 +52,14 @@ class osiam (
     $homedir        = '/etc/osiam',
     $dbforceschema  = false,
 ) {
-    osiam::artifact { 'authorization-server': }
-    osiam::artifact { 'oauth2-client': }
-
     file { $homedir:
         ensure => directory,
         owner  => 'root',
         group  => 'root',
+        mode   => '0744',
     }
 
-      file { 'db-config.properties':
-        path    => "${homedir}/db-config.properties",
-        ensure  => $osiam::ensure,
-        content => template('osiam/db-config.properties.erb'),
-        notify => Service[$tomcatservice]
-      }
-
-    case $ensure {
-        present: {
-            # Check if there is a new init.sql script inside the authorization-server.war and
-            # extract it to ${homedir}/install-schema.sql
-            exec { 'extract-install-schema':
-                path    => '/usr/bin',
-                command => "unzip -p ${webappsdir}/authorization-server.war \
-                            WEB-INF/classes/sql/init.sql > ${homedir}/install-schema.sql",
-                unless  => "unzip -p ${webappsdir}/authorization-server.war \
-                            WEB-INF/classes/sql/init.sql > /tmp/init.sql && \
-                            test \"$(md5sum /tmp/init.sql | awk '{print \$1}')\" == \
-                            \"$(md5sum ${homedir}/install-schema.sql | awk '{print \$1}')\"",
-                require => [
-                                File[$homedir],
-                                Maven['authorization-server'],
-                           ],
-            }
-            # Check if there is a new drop.sql script inside the authorization-server.war and
-            # extract it to ${homedir}/remove-schema.sql
-            exec { 'extract-remove-schema':
-                path    => '/usr/bin',
-                command => "unzip -p ${webappsdir}/authorization-server.war \
-                            WEB-INF/classes/sql/drop.sql > ${homedir}/remove-schema.sql",
-                unless  => "unzip -p ${webappsdir}/authorization-server.war \
-                            WEB-INF/classes/sql/drop.sql > /tmp/drop.sql && \
-                            test \"$(md5sum /tmp/drop.sql | awk '{print \$1}')\" == \
-                            \"$(md5sum ${homedir}/remove-schema.sql | awk '{print \$1}')\"",
-                require => [
-                                File[$homedir],
-                                Maven['authorization-server'],
-                           ],
-            }
-
-            if $dbforceschema {
-                # If install-schema.sql was modified through extract-install-schema (there is a new
-                # version) then dump remove-schema.sql and afterwards install-schema.sql
-                exec { 'force-schema':
-                    path        => '/usr/bin',
-                    environment => "PGPASSWORD=${dbpassword}",
-                    command     => "psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w < \
-                                    ${homedir}/remove-schema.sql && \
-                                    psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w < \
-                                    ${homedir}/install-schema.sql",
-                    refreshonly => true,
-                    subscribe   => Exec["extract-install-schema"],
-                    before      => Exec['install-schema'],
-                    notify      => Service[$tomcatservice],
-                }
-            }
-            # Check if table scim_meta existsi and dump install-schema.sql if it's missing
-            exec { 'install-schema':
-                path        => '/usr/bin',
-                environment => "PGPASSWORD=${dbpassword}",
-                command     => "psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w < \
-                                ${homedir}/install-schema.sql",
-                unless      => "psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w -c \
-                                'select * from scim_meta'",
-                require     => Exec["extract-install-schema"],
-                notify      => Service[$tomcatservice],
-            }
-        }
-        absent: {
-            exec { 'remove-schema':
-                path        => '/usr/bin',
-                environment => "PGPASSWORD=${dbpassword}",
-                command     => "psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w < \
-                                ${homedir}/remove-schema.sql",
-                onlyif      => "psql -h ${dbhost} -U ${dbuser} -d ${dbname} -w -c \
-                                'select * from scim_meta' && \
-                                test -s ${homedir}/remove-schema.sql",
-            }
-        }
-        default: {
-            fail("Please set ensure to either 'present' or 'absent'")
-        }
-    }
+    osiam::artifact { 'authorization-server': }
+    osiam::artifact { 'oauth2-client': }
+    class { 'osiam::database': }
 }
