@@ -1,0 +1,5 @@
+[jpackage-6.0-generic]
+name=JPackage 6.0, for generic
+#baseurl=MIRROR/6.0/generic/free/
+mirrorlist=http://www.jpackage.org/mirrorlist.php?dist=generic&type=free&release=6.0
+gpgcheck=1

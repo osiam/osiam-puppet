@@ -48,6 +48,7 @@ class osiam (
     $installdb      = true,
     $ensure         = present,
     $webappsdir     = '/var/lib/tomcat7/webapps',
+    $installas      = true,
     $owner          = 'tomcat',
     $group          = 'tomcat',
     $tomcatservice  = 'tomcat7',
@@ -61,12 +62,18 @@ class osiam (
         mode   => '0744',
     }
 
-    stage { 'osiam-postgres': before => stage['main'], }
+    stage { 'osiam-prep': before => stage['main'], }
 
     if $installdb {
         class { 'osiam::postgresql':
-            stage => 'osiam-postgres',
+            stage => 'osiam-prep',
         }
+    }
+    if $installas {
+        class { 'osiam::tomcat::install':
+            stage => 'osiam-prep',
+        }
+        class { 'osiam::tomcat::config': }
     }
 
     osiam::artifact { 'authorization-server': }
