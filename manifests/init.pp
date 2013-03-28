@@ -44,6 +44,7 @@ class osiam (
     $dbpassword,
     $dbname,
     $dbhost         = $::fqdn,
+    $dbconnect      = undef,
     $installdb      = true,
     $ensure         = present,
     $webappsdir     = '/var/lib/tomcat7/webapps',
@@ -60,8 +61,12 @@ class osiam (
         mode   => '0744',
     }
 
+    stage { 'osiam-postgres': before => stage['main'], }
+
     if $installdb {
-        class { 'osiam::postgresql': }->
+        class { 'osiam::postgresql':
+            stage => 'osiam-postgres',
+        }
     }
 
     osiam::artifact { 'authorization-server': }
