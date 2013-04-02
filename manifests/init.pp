@@ -57,7 +57,11 @@ class osiam (
     $tomcatservice  = 'tomcat7',
     $homedir        = '/etc/osiam',
 ) {
-    stage { 'osiam-prep': before => stage['main'], }
+    if $ensure == 'present' {
+        stage { 'osiam-prep': before => stage['main'], }
+    } else {
+        stage { 'osiam-prep': require => stage['main'], }
+    }
 
     if $installdb {
         class { 'osiam::postgresql':
@@ -77,7 +81,6 @@ class osiam (
         group  => 'root',
         mode   => '0744',
     }
-
 
     osiam::artifact { 'authorization-server': }
     osiam::artifact { 'oauth2-client': }
