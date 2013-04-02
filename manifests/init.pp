@@ -58,8 +58,12 @@ class osiam (
     $homedir        = '/etc/osiam',
 ) {
     if $ensure == 'present' {
+        $service_enable = true
+        $service_ensure = running
         stage { 'osiam-prep': before => stage['main'], }
     } else {
+        $service_enable = false
+        $service_ensure = stopped
         stage { 'osiam-prep': require => stage['main'], }
     }
 
