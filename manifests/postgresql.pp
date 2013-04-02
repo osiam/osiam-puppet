@@ -30,9 +30,16 @@ class osiam::postgresql {
     $port               = '5432'
 
     if ( $::operatingsystem == 'CentOS' ) or ( $::lsbmajdistrelease == '6') {
-        class { 'osiam::postgresql::install': }->
-        class { 'osiam::postgresql::user': }->
-        class { 'osiam::postgresql::database': }
+        include osiam::postgresql::install
+        include osiam::postgresql::user
+        include osiam::postgresql::database
+        if $osiam::ensure == 'present' {
+            Class['osiam::postgresql::install'] -> Class['osiam::postgresql::user'] ->
+            Class['osiam::postgresql::database']
+        } else {
+            Class['osiam::postgresql::database'] -> Class['osiam::postgresql::user'] ->
+            Class['osiam::postgresql::install']
+        }
     } else {
         fail('Unsupported Operatingsystem')
     }

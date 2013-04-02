@@ -21,51 +21,56 @@
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
 class osiam::postgresql::install {
-    exec { 'installpostgresrepo':
-        path    => '/bin:/usr/bin',
-        command => "wget -O ${osiam::postgresql::repositorytmp} ${osiam::postgresql::repository} && \
-                    yum install -y ${osiam::postgresql::repositorytmp} && \
-                    rm -f ${osiam::postgresql::repositorytmp}",
-        unless  => "yum list installed pgdg-redhat92.noarch",
+    if $osiam::ensure == 'present' {
+        exec { 'installpostgresrepo':
+            path    => '/bin:/usr/bin',
+            command => "wget -O ${osiam::postgresql::repositorytmp} ${osiam::postgresql::repository} && \
+                        yum install -y ${osiam::postgresql::repositorytmp} && \
+                        rm -f ${osiam::postgresql::repositorytmp}",
+            unless => "yum list installed pgdg-redhat92.noarch",
+        }
+
+        exec { 'postgresqlinitdb':
+            command     => "/sbin/service ${osiam::postgresql::service} initdb",
+            refreshonly => true,
+        }
+
+        Exec['installpostgresrepo'] -> Package[$osiam::postgresql::package] ~> Exec['postgresqlinitdb'] ->
+        File["${osiam::postgresql::cpath}/postgresql.conf"] ->
+        File["${osiam::postgresql::cpath}/pg_hba.conf"] -> Service[$osiam::postgresql::service]  
+
+        File["${osiam::postgresql::cpath}/postgresql.conf"] ~> Service[$osiam::postgresql::service]
+        File["${osiam::postgresql::cpath}/pg_hba.conf"] ~> Service[$osiam::postgresql::service]
+    } else {
+        File["${osiam::postgresql::cpath}/postgresql.conf"] ->
+        File["${osiam::postgresql::cpath}/pg_hba.conf"] -> Service[$osiam::postgresql::service] ->
+        Package[$osiam::postgresql::package]
     }
 
     package { $osiam::postgresql::package:
-        ensure  => installed,
-        require => Exec['installpostgresrepo'],
-        notify  => Exec['postgresqlinitdb'],
-    }
-
-    exec { 'postgresqlinitdb':
-        command     => "/sbin/service ${osiam::postgresql::service} initdb",
-        refreshonly => true,
-        before      => Service[$osiam::postgresql::service],
+        ensure  => $osiam::ensure,
     }
     
     service { $osiam::postgresql::service:
-        ensure  => running,
-        enable  => true,
+        ensure  => $osiam::service_ensure,
+        enable  => $osiam::service_enable,
         status  => '/bin/ps ax | /bin/grep postgres | /bin/grep -v grep',
-        require => Package[$osiam::postgresql::package],
     }
     
     file { "${osiam::postgresql::cpath}/postgresql.conf":
-        ensure	=> present,
+        ensure	=> $osiam::ensure,
         mode	=> '0644',
         owner	=> 'postgres',
         group	=> 'postgres',
         content	=> template('osiam/postgresql.conf.erb'),
-        notify	=> Service[$osiam::postgresql::service],
-        require	=> Exec['postgresqlinitdb'],
     }
     
     file { "${osiam::postgresql::cpath}/pg_hba.conf":
-        ensure	=> present,
+        ensure	=> $osiam::ensure,
         mode    => '0644',
         owner   => 'postgres',
         group   => 'postgres',
         content => template('osiam/pg_hba.conf.erb'),
-        notify	=> Service["$osiam::postgresql::service"],
-        require	=> Exec['postgresqlinitdb'],
     }
     
     firewall { '100 postgresql':
