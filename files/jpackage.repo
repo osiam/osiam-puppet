@@ -1,3 +1,6 @@
+#
+# File managed by puppet
+#
 [jpackage-6.0-generic]
 name=JPackage 6.0, for generic
 #baseurl=MIRROR/6.0/generic/free/
