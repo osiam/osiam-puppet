@@ -3,7 +3,7 @@ osiam-puppet
 
 This repository conatins the [OSIAM NG Puppet Manifest](manifests/init.pp).
 
-The [manifest](manifests/init.pp) currently deploys the OSIAM NG *authorization-server* and the *oauth2-client* war files to an existing application server (tested with Tomcat 7) and initializes the database when `$ensure` is set to "present" or removes the files from their installation directories and cleans the database when `$ensure`is set to "absend".
+The [manifest](manifests/init.pp) currently deploys the OSIAM NG *authorization-server* and the *oauth2-client* war files to an existing application server (tested with Tomcat 7) and initializes the database when `$ensure` is set to "present" or removes the files from their installation directories and cleans the database when `$ensure`is set to "absend". By default this module will install and configure Postgres 9.2 and Tomcat 7.
 
 Prerequisite
 ============
@@ -15,20 +15,31 @@ Host:
 * OS: Centos 6
 * Java 1.7
 * maven
-* Tomcat 7
-* Postgresql 9.2
 * unzip
 
 Usage
 ============
-The following will install Osiam Version 0.3 and initialize the database 'osiam' on the same maschine. War files will be deployed to `/var/lib/tomcat7/webapps`
+Use the following example to install everything including postgresql 9.2 and tomcat 7. This will install Osiam Version 0.3 and initialize the database 'osiam' on the same maschine. War files will be deployed to `/var/lib/tomcat7/webapps`
 ```puppet
   class { 'osiam':
-    ensure      => present,
-    version     => '0.3',
-    dbuser      => 'osiam',
-    dbpassword  => 'mypassword',
-    dbname      => 'osiam',
+        ensure  => present,
+        version => '0.3',
+  }
+```
+If you want to manage your database and application server by yourself use this example:
+```puppet
+  class { 'osiam':
+        ensure          => present,
+        version         => '0.3',
+        installdb       => false,
+        dbhost          => '<database_host>',
+        dbname          => '<database_name>',
+        dbuser          => '<database_user>',
+        dbpassword      => '<database_password>',
+        installas       => false,
+        webappsdir      => '<webapps_directory>',
+        owner           => '<application_server_owner>',
+        group           => '<application_server_group>',
   }
 ```
 
