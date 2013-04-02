@@ -1,3 +1,24 @@
+# Class: osiam::postgresql
+#
+# This is the central postgresql class. It invokes the installation, user and database creation
+# classes. Fails if the operating system isn't CentOS 6.
+#
+# Parameters:
+#
+# Actions:
+#
+# Requires:
+#   maven installed
+#   puppet-maven module
+#   java 1.7
+#   unzip
+#
+# Sample Usage:
+#   class { 'osiam::postgresql': }
+#
+# Authors:
+#   Kevin Viola Schmitz <k.schmitz@tarent.de>
+#
 class osiam::postgresql {
     $package            = 'postgresql92-server'
     $service            = 'postgresql-9.2'

@@ -1,3 +1,25 @@
+# Class: osiam::postgresql::database
+#
+# This class creates a database. The owner of this database is the user created with
+# osiam::postgresl::user.
+#
+#
+# Parameters:
+#
+# Actions:
+#
+# Requires:
+#   maven installed
+#   puppet-maven module
+#   java 1.7
+#   unzip
+#
+# Sample Usage:
+#   class { 'osiam::postgresql::database': }
+#
+# Authors:
+#   Kevin Viola Schmitz <k.schmitz@tarent.de>
+#
 class osiam::postgresql::database {
     exec { "createdatabase_$osiam::dbname":
         command => "/usr/bin/psql -U postgres -c \

@@ -1,3 +1,25 @@
+# Class: osiam::postgresql::install
+#
+# This class installs postgresql 9.2 by first installing the postgres repository. It then does a database
+# initialization and sets up basic firewall rule.
+#
+#
+# Parameters:
+#
+# Actions:
+#
+# Requires:
+#   maven installed
+#   puppet-maven module
+#   java 1.7
+#   unzip
+#
+# Sample Usage:
+#   class { 'osiam::postgresql::install': }
+#
+# Authors:
+#   Kevin Viola Schmitz <k.schmitz@tarent.de>
+#
 class osiam::postgresql::install {
     exec { 'installpostgresrepo':
         path    => '/bin:/usr/bin',
