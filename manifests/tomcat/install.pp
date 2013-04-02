@@ -1,3 +1,24 @@
+# Class: osiam::tomcat::install
+#
+# This class installs tomcat 7 on a CentOS 6 system. It is installed from the jpackage repository. A basic
+# firewall rule is set up.
+#
+# Parameters:
+#
+# Actions:
+#
+# Requires:
+#   maven installed
+#   puppet-maven module
+#   java 1.7
+#   unzip
+#
+# Sample Usage:
+#   class { 'osiam::tomcat::install': }
+#
+# Authors:
+#   Kevin Viola Schmitz <k.schmitz@tarent.de>
+#
 class osiam::tomcat::install {
     if ( $::operatingsystem == 'CentOS' ) or ( $::lsbmajdistrelease == '6') {
         file { '/etc/yum.repos.d/jpackage.repo':
