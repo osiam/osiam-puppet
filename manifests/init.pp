@@ -1,21 +1,25 @@
 # Class: osiam
 #
-# This class deploys the osiam war(s) into an existing application server and installs a database
-# schema for postgresql.
+# This class deploys the osiam war(s) into an application server and installs a
+# database schema for postgresql. It can also install and configure the
+# application server (tomcat 7) and database (postgres 9.2).
 #
 # Parameters:
-#   [*ensure*]          - Wether to install or remove osiam. Valid arguments are absent or present.
-#   [*version*]         - Version of osiam artifacts to deploy.
-#   [*webappsdir]       - Tomcat7 webapps directory path.
-#   [*owner*]           - Artifact owner on filesystem.
-#   [*group*]           - Artifact group on filesystem.
-#   [*homedir*]         - Directory for osiam non-war files.
-#   [*dbhost*]          - postgresql database hostname
-#   [*dbuser*]          - postgresql database username
-#   [*dbpassword*]      - postgresql database user password
-#   [*dbname*]          - postgresql database name
-#   [*dbforceschema*]   - if set to 'true' all database tables will be dropped and redeployed if there
-#                         are changes to the schema.
+#  [*ensure*]           - Wether to install or remove osiam. Valid arguments are absent or present.
+#  [*version*]          - Version of osiam artifacts to deploy.
+#  [*dbuser*]           - postgresql database username
+#  [*dbpassword*]       - postgresql database user password
+#  [*dbname*]           - postgresql database name
+#  [*dbhost*]           - postgresql database hostname
+#  [*dbforceschema*]    - if set to 'true' all database tables will be dropped and redeployed if there
+#  [*dbconnect*]        - An array of IPs that can connect to the database using md5 auth method.
+#  [*installdb*]        - true (default) to install and configure postgresql 9.2
+#  [*webappsdir*]       - Tomcat7 webapps directory path.
+#  [*installas*]        - true (default) to install and configure tomcat 7
+#  [*owner*]            - Artifact owner on filesystem.
+#  [*group*]            - Artifact group on filesystem.
+#  [*tomcatservice*]    - Name of the tomcat service (for restarts)
+#  [*homedir*]          - Directory for osiam non-war files.
 #
 # Actions:
 #
@@ -24,8 +28,6 @@
 #   maven installed
 #   puppet-maven module
 #   java 1.7
-#   tomcat 7
-#   postgresql 9.2
 #   unzip
 #
 # Sample Usage:
@@ -40,11 +42,12 @@
 #
 class osiam (
     $version,  
-    $dbuser,
-    $dbpassword,
-    $dbname,
+    $dbuser         = 'ong',
+    $dbpassword     = 'ong',
+    $dbname         = 'ong',
     $dbhost         = $::fqdn,
-    $dbconnect      = undef,
+    $dbforceschema  = false,
+    $dbconnect      = $::ipaddress,
     $installdb      = true,
     $ensure         = present,
     $webappsdir     = '/var/lib/tomcat7/webapps',
@@ -53,15 +56,7 @@ class osiam (
     $group          = 'tomcat',
     $tomcatservice  = 'tomcat7',
     $homedir        = '/etc/osiam',
-    $dbforceschema  = false,
 ) {
-    file { $homedir:
-        ensure => directory,
-        owner  => 'root',
-        group  => 'root',
-        mode   => '0744',
-    }
-
     stage { 'osiam-prep': before => stage['main'], }
 
     if $installdb {
@@ -75,6 +70,14 @@ class osiam (
         }
         class { 'osiam::tomcat::config': }
     }
+
+    file { $homedir:
+        ensure => directory,
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0744',
+    }
+
 
     osiam::artifact { 'authorization-server': }
     osiam::artifact { 'oauth2-client': }
