@@ -20,6 +20,7 @@
 #  [*group*]            - Artifact group on filesystem.
 #  [*tomcatservice*]    - Name of the tomcat service (for restarts)
 #  [*homedir*]          - Directory for osiam non-war files.
+#  [*installjava*]      - true (default) to install java 1.7
 #
 # Actions:
 #
@@ -56,6 +57,7 @@ class osiam (
     $group          = 'tomcat',
     $tomcatservice  = 'tomcat7',
     $homedir        = '/etc/osiam',
+    $installjava    = true,
 ) {
     if $ensure == 'present' {
         $service_enable = true
@@ -77,6 +79,11 @@ class osiam (
             stage => 'osiam-prep',
         }
         class { 'osiam::tomcat::config': }
+    }
+    if $installjava {
+        package { 'java-1.7.0-openjdk':
+            ensure => present,
+        }
     }
 
     file { $homedir:

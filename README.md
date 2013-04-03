@@ -13,7 +13,6 @@ Puppet:
 
 Host:
 * OS: Centos 6
-* Java 1.7
 * maven
 * unzip
 
