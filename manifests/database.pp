@@ -58,7 +58,7 @@ class osiam::database {
                            ],
             }
 
-            if $dbforceschema {
+            if $osiam::dbforceschema {
                 # If install-schema.sql was modified through extract-install-schema (there is a new
                 # version) then dump remove-schema.sql and afterwards install-schema.sql
                 exec { 'force-schema':
