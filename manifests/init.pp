@@ -80,11 +80,6 @@ class osiam (
         }
         class { 'osiam::tomcat::config': }
     }
-    if $installjava {
-        package { 'java-1.7.0-openjdk':
-            ensure => present,
-        }
-    }
 
     file { $homedir:
         ensure => directory,

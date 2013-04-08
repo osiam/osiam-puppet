@@ -20,13 +20,20 @@
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
 class osiam::tomcat::install {
-    if ( $::operatingsystem == 'CentOS' ) or ( $::lsbmajdistrelease == '6') {
+    if ( $::operatingsystem == 'CentOS' ) and ( $::lsbmajdistrelease == '6') {
         file { '/etc/yum.repos.d/jpackage.repo':
             ensure => $osiam::ensure,
             owner  => 'root',
             group  => 'root',
             mode   => '0644',
             source => 'puppet:///modules/osiam/jpackage.repo',
+        }
+
+        if $osiam::installjava {
+            package { 'java-1.7.0-openjdk':
+                ensure => $osiam::ensure,
+                before => Package['tomcat7'],
+            }
         }
 
         if $osiam::ensure == 'present' {
