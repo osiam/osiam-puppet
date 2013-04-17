@@ -54,9 +54,9 @@ Puppet::Type.type(:war).provide(:war) do
 		artifactid	= @resource[:artifactid]
 		path		= @resource[:path]
 		owner		= @resource[:owner]
-		owner		= owner.nill? || owner.empty? ? "root" : owner
+		owner		= owner.nil? || owner.empty? ? "root" : owner
 		group		= @resource[:group]
-		group		= group.nill? || group.empty? ? "root" : group
+		group		= group.nil? || group.empty? ? "root" : group
 		artifact	= "#{path}/#{artifactid}.war"
 		groupid		= 'org.osiam.ng'
 		plugin		= "2.4"
