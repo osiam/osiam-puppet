@@ -8,6 +8,7 @@ Puppet::Type.type(:war).provide(:war) do
 	include Puppet::Util::Execution
 	include Puppet::Util::Warnings
 
+	# Function to get file owner.
 	def owner
 		artifactid	= @resource[:artifactid]
 		path		= @resource[:path]
@@ -16,6 +17,7 @@ Puppet::Type.type(:war).provide(:war) do
 		uid = File.stat("#{artifact}").uid
 		Etc.getpwuid(uid).name
 	end
+	# Function to enforce file owner.
 	def owner=(owner)
 		artifactid	= @resource[:artifactid]
 		path		= @resource[:path]
@@ -28,6 +30,7 @@ Puppet::Type.type(:war).provide(:war) do
 			raise Puppet::Error, "Failed to set owner to '#{owner}': #{detail}"
 		end
 	end
+	# Function to get file group.
 	def group
 		artifactid	= @resource[:artifactid]
 		path		= @resource[:path]
@@ -36,6 +39,7 @@ Puppet::Type.type(:war).provide(:war) do
 		gid = File.stat("#{artifact}").gid
 		Etc.getgrgid(gid).name
 	end
+	# Function to enforce file group.
 	def group=(group)
 		artifactid	= @resource[:artifactid]
 		path		= @resource[:path]
@@ -49,6 +53,8 @@ Puppet::Type.type(:war).provide(:war) do
 		end
 	end
 
+	# Function to create file.
+	# Will be called if ensure is set to 'present'.
 	def create
 		version		= @resource[:version]
 		artifactid	= @resource[:artifactid]
@@ -79,10 +85,6 @@ Puppet::Type.type(:war).provide(:war) do
 		debug "Exit Status = #{status.exitstatus}"
 
 		# Change artifact permission
-		#command = ["chown #{owner}:#{group} #{artifact}"]
-		#output, status	= Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
-		#debug output if status.exitstatus == 0
-		#debug "Exit Status = #{status.exitstatus}"
 		begin
 			File.chown(Etc.getpwnam(owner).uid,Etc.getgrnam(group).gid,artifact)
 		rescue => detail
@@ -90,6 +92,8 @@ Puppet::Type.type(:war).provide(:war) do
 		end
 	end
 
+	# Function to delete file.
+	# Will be called if ensure is set to 'absent'.
 	def destroy
 		artifactid	= @resource[:artifactid]
 		path		= @resource[:path]
@@ -97,6 +101,10 @@ Puppet::Type.type(:war).provide(:war) do
 		File.delete(artifact)
 	end
 
+	# Function to check if file exists.
+	# In this case it will also check its md5sum and
+	# compare it to the newest artifact
+	# (of the same version) in the repository.
 	def exists?
 		version		= @resource[:version]
 		artifactid	= @resource[:artifactid]
