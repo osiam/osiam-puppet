@@ -88,7 +88,19 @@ class osiam (
         mode   => '0744',
     }
 
-    osiam::artifact { 'authorization-server': }
-    osiam::artifact { 'oauth2-client': }
+    war { 'authorization-server':
+        ensure  => $ensure,
+        version => $version,
+        path    => $webappsdir,
+        owner   => $owner,
+        group   => $group,
+    }
+    war { 'oauth2-client':
+        ensure  => $ensure,
+        version => $version,
+        path    => $webappsdir,
+        owner   => $owner,
+        group   => $group,
+    }
     class { 'osiam::database': }
 }

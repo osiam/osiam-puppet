@@ -39,7 +39,7 @@ class osiam::database {
                             \"$(md5sum ${osiam::homedir}/install-schema.sql | awk '{print \$1}')\"",
                 require => [
                                 File[$osiam::homedir],
-                                Maven['authorization-server'],
+                                War['authorization-server'],
                            ],
             }
             # Check if there is a new drop.sql script inside the authorization-server.war and
@@ -54,7 +54,7 @@ class osiam::database {
                             \"$(md5sum ${osiam::homedir}/remove-schema.sql | awk '{print \$1}')\"",
                 require => [
                                 File[$osiam::homedir],
-                                Maven['authorization-server'],
+                                War['authorization-server'],
                            ],
             }
 
