@@ -7,10 +7,6 @@ The [manifest](manifests/init.pp) currently deploys the OSIAM NG *authorization-
 
 Prerequisite
 ============
-Puppet:
-* [puppet-maven](https://github.com/maestrodev/puppet-maven)
-* [puppet-wget](https://github.com/maestrodev/puppet-wget)
-
 Host:
 * OS: Centos 6
 * maven
