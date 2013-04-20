@@ -43,64 +43,82 @@
 #
 class osiam (
     $version,  
+    $ensure         = present,
+    $homedir        = '/etc/osiam',
+    $installdb      = true,
     $dbuser         = 'ong',
     $dbpassword     = 'ong',
     $dbname         = 'ong',
     $dbhost         = $::fqdn,
     $dbforceschema  = false,
     $dbconnect      = $::ipaddress,
-    $installdb      = true,
-    $ensure         = present,
-    $webappsdir     = '/var/lib/tomcat7/webapps',
     $installas      = true,
+    $webappsdir     = '/var/lib/tomcat7/webapps',
     $owner          = 'tomcat',
     $group          = 'tomcat',
     $tomcatservice  = 'tomcat7',
-    $homedir        = '/etc/osiam',
     $installjava    = true,
+    $installmaven   = true,
 ) {
+    class install {
+        if $osiam::installmaven {
+            package { 'maven':
+                ensure => 'present',
+            }
+        }
+        if $osiam::installdb {
+            class { 'osiam::postgresql': }
+        }
+        if $osiam::installas {
+            class { 'osiam::tomcat::install': }
+        }
+    }
+    class config { 
+            class { 'osiam::tomcat::config': }
+            class { 'osiam::database': }
+    }
+    class deploy {
+        file { $osiam::homedir:
+            ensure => directory,
+            owner  => 'root',
+            group  => 'root',
+            mode   => '0744',
+        }
+
+        war { 'authorization-server':
+            ensure  => $osiam::ensure,
+            version => $osiam::version,
+            path    => $osiam::webappsdir,
+            owner   => $osiam::owner,
+            group   => $osiam::group,
+        }
+        war { 'oauth2-client':
+            ensure  => $osiam::ensure,
+            version => $osiam::version,
+            path    => $osiam::webappsdir,
+            owner   => $osiam::owner,
+            group   => $osiam::group,
+        }
+
+    }
+
     if $ensure == 'present' {
         $service_enable = true
         $service_ensure = running
-        stage { 'osiam-prep': before => stage['main'], }
+        stage { 'install': before => Stage['main'], }
     } else {
         $service_enable = false
         $service_ensure = stopped
-        stage { 'osiam-prep': require => stage['main'], }
+        stage { 'install': require => Stage['main'], }
     }
 
-    if $installdb {
-        class { 'osiam::postgresql':
-            stage => 'osiam-prep',
-        }
+    class { 'install':
+        stage => 'install',
     }
-    if $installas {
-        class { 'osiam::tomcat::install':
-            stage => 'osiam-prep',
-        }
-        class { 'osiam::tomcat::config': }
+    class { 'config':
+        stage => 'main',
     }
-
-    file { $homedir:
-        ensure => directory,
-        owner  => 'root',
-        group  => 'root',
-        mode   => '0744',
+    class { 'deploy':
+        stage => 'main',
     }
-
-    war { 'authorization-server':
-        ensure  => $ensure,
-        version => $version,
-        path    => $webappsdir,
-        owner   => $owner,
-        group   => $group,
-    }
-    war { 'oauth2-client':
-        ensure  => $ensure,
-        version => $version,
-        path    => $webappsdir,
-        owner   => $owner,
-        group   => $group,
-    }
-    class { 'osiam::database': }
 }
