@@ -83,7 +83,9 @@ Puppet::Type.type(:war).provide(:war) do
 		output, status	= Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
 		debug output if status.exitstatus == 0
 		debug "Exit Status = #{status.exitstatus}"
-
+		if status.exitstatus != 0
+			raise Puppet::Error, "Failed to download artifact: #{output}"
+		end
 		# Change artifact permission
 		begin
 			File.chown(Etc.getpwnam(owner).uid,Etc.getgrnam(group).gid,artifact)
