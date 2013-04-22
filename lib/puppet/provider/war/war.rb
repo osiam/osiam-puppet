@@ -1,5 +1,6 @@
 require 'puppet/resource'
 require 'puppet/resource/catalog'
+require 'digest/md5'
 require 'fileutils'
 require 'etc'
 
@@ -10,19 +11,14 @@ Puppet::Type.type(:war).provide(:war) do
 
 	# Function to get file owner.
 	def owner
-		artifactid	= @resource[:artifactid]
-		path		= @resource[:path]
-		artifact	= "#{path}/#{artifactid}.war"
-
+		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
 		uid = File.stat("#{artifact}").uid
 		Etc.getpwuid(uid).name
 	end
 	# Function to enforce file owner.
 	def owner=(owner)
-		artifactid	= @resource[:artifactid]
-		path		= @resource[:path]
-		owner		= @resource[:owner]
-		artifact	= "#{path}/#{artifactid}.war"
+		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
+		owner = @resource[:owner]
 
 		begin
 			File.chown(Etc.getpwnam(owner).uid,nil,artifact)
@@ -32,19 +28,14 @@ Puppet::Type.type(:war).provide(:war) do
 	end
 	# Function to get file group.
 	def group
-		artifactid	= @resource[:artifactid]
-		path		= @resource[:path]
-		artifact	= "#{path}/#{artifactid}.war"
-
+		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
 		gid = File.stat("#{artifact}").gid
 		Etc.getgrgid(gid).name
 	end
 	# Function to enforce file group.
 	def group=(group)
-		artifactid	= @resource[:artifactid]
-		path		= @resource[:path]
-		group		= @resource[:group]
-		artifact	= "#{path}/#{artifactid}.war"
+		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
+		group = @resource[:group]
 
 		begin
 			File.chown(nil,Etc.getgrnam(group).gid,artifact)
@@ -111,27 +102,22 @@ Puppet::Type.type(:war).provide(:war) do
 		version		= @resource[:version]
 		artifactid	= @resource[:artifactid]
 		path 		= @resource[:path]
+		artifact	= "#{path}/#{artifactid}.war"
 		groupid		= 'org/osiam/ng'
+		repository 	= 'http://repo.osiam.org'
 
-		if version =~ /^.*-SNAPSHOT$/
-			repository = 'http://repo.osiam.org/snapshots'
-		else
-			repository = 'http://repo.osiam.org/release'
-		end
+		repoappend = version =~ /^.*-SNAPSHOT$/ ? 'snaphots' : 'release'
+		repository = repository + '/' + repoappend
 		url = "#{repository}/#{groupid}/#{artifactid}/#{version}"
 
 
 		if File.exists?("#{path}/#{artifactid}.war")
 			# Get our artifacts md5sum
-			command = ["md5sum #{path}/#{artifactid}.war | cut -d ' ' -f 1"]
-			warmd5, status	= Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
-			debug warmd5 if status.exitstatus == 0
-			debug "Exit Status = #{status.exitstatus}"
-			warmd5 = warmd5.sub("\n",'')
+			warmd5 = Digest::MD5.hexdigest(File.read("#{artifact}"))
 
 			# Get newest artifacts md5sum (from repo)
 			# Download the index of #{repository}
-			command = [ "wget -O- #{url} 2>&1 | grep '.war' | grep '.md5' | tail -n 1" ]
+			command = [ "wget -O- #{url} 2>&1 | grep '.war.md5' | tail -n 1" ]
 			md5file, status = Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
 			debug command if status.exitstatus == 0
 			debug "Exit Status = #{status.exitstatus}"
@@ -143,11 +129,8 @@ Puppet::Type.type(:war).provide(:war) do
 			debug md5sum if status.exitstatus == 0
 			debug "Exit Status = #{status.exitstatus}"
 
-			if md5sum == warmd5
-				return true
-			else
-				return false
-			end
+			# return true if md5sum == warmd5
+			return md5sum == warmd5
 		else
 			return false
 		end
