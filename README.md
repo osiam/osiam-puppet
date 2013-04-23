@@ -38,4 +38,4 @@ If you want to manage your database and application server by yourself use this 
   }
 ```
 
-Further useage information can be found in the [manifest's header](manifests/init.pp).
+Further usage information can be found in the [manifest's header](manifests/init.pp).
