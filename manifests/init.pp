@@ -62,7 +62,7 @@ class osiam (
 ) {
     class install {
         if $osiam::installmaven {
-            package { 'maven':
+            package { 'maven2':
                 ensure => 'present',
             }
         }
