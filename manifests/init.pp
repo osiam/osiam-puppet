@@ -61,23 +61,26 @@ class osiam (
     $installmaven   = true,
 ) {
     class install {
-        if $osiam::installmaven {
-            package { 'maven2':
-                ensure => 'present',
-            }
-        }
         if $osiam::installdb {
             class { 'osiam::postgresql::install': }
             class { 'osiam::postgresql::user': }
             class { 'osiam::postgresql::database': }
         }
+
+        if ( $osiam::installmaven ) or ( $osiam::installas ) {
+            class { 'osiam::jpackage': }
+        }
+
+        if $osiam::installmaven {
+            package { 'maven2':
+                ensure => 'present',
+            }
+        }
+
         if $osiam::installas {
             class { 'osiam::tomcat::install': }
-        }
-    }
-    class config { 
             class { 'osiam::tomcat::config': }
-            class { 'osiam::database': }
+        }
     }
     class deploy {
         file { $osiam::homedir:
@@ -94,6 +97,9 @@ class osiam (
             owner   => $osiam::owner,
             group   => $osiam::group,
         }
+
+        class { 'osiam::database': }
+        
         war { 'oauth2-client':
             ensure  => $osiam::ensure,
             version => $osiam::version,
@@ -116,9 +122,6 @@ class osiam (
 
     class { 'install':
         stage => 'install',
-    }
-    class { 'config':
-        stage => 'main',
     }
     class { 'deploy':
         stage => 'main',

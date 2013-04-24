@@ -21,13 +21,6 @@
 #
 class osiam::tomcat::install {
     if ( $::operatingsystem == 'CentOS' ) and ( $::lsbmajdistrelease == '6') {
-        file { '/etc/yum.repos.d/jpackage.repo':
-            ensure => $osiam::ensure,
-            owner  => 'root',
-            group  => 'root',
-            mode   => '0644',
-            source => 'puppet:///modules/osiam/jpackage.repo',
-        }
 
         if $osiam::installjava {
             package { 'java-1.7.0-openjdk':
@@ -36,26 +29,9 @@ class osiam::tomcat::install {
             }
         }
 
-        if $osiam::ensure == 'present' {
-            exec { 'jpackage-repo-yumcleanall':
-                path        => '/usr/bin',
-                command     => 'yum clean all',
-                refreshonly => true,
-                before      => Package['tomcat7'],
-                subscribe   => File['/etc/yum.repos.d/jpackage.repo'],
-            }
-
-            exec { 'jpackage-gpg':
-                path        => '/bin',
-                command     => 'rpm --import http://www.jpackage.org/jpackage.asc',
-                refreshonly => true,
-                before      => Package['tomcat7'],
-                subscribe   => File['/etc/yum.repos.d/jpackage.repo'],
-            }
-        }
-
         package { 'tomcat7':
-            ensure => $osiam::ensure,
+            ensure  => $osiam::ensure,
+            require => Class['osiam::jpackage'],
         }
 
         firewall { '099 tomcat':

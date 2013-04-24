@@ -26,11 +26,13 @@ class osiam::tomcat::config {
             path    => '/usr/share/tomcat7/conf/catalina.properties',
             ensure  => $osiam::ensure,
             content => template('osiam/catalina.properties.erb'),
-            notify  => Service['tomcat7']
+            require => Class['osiam::tomcat::install'],
+            notify  => Service['tomcat7'],
         }
         service { 'tomcat7':
-             ensure  => $osiam::service_ensure,
-             enable  => $osiam::service_enable,
+            ensure  => $osiam::service_ensure,
+            enable  => $osiam::service_enable,
+            require => Class['osiam::tomcat::install'],
         }
     }
 }
