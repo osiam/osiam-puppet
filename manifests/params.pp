@@ -19,7 +19,7 @@
 # Authors:
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
-class osiam::postgresql {
+class osiam::params {
     $package            = 'postgresql92-server'
     $service            = 'postgresql-9.2'
     $cpath              = '/var/lib/pgsql/9.2/data'
@@ -28,20 +28,4 @@ class osiam::postgresql {
     $repositorytmp      = "/tmp/${rpm}"
     $listenaddresses    = '0.0.0.0'
     $port               = '5432'
-
-    if ( $::operatingsystem == 'CentOS' ) or ( $::lsbmajdistrelease == '6') {
-        include osiam::postgresql::install
-        include osiam::postgresql::user
-        include osiam::postgresql::database
-        if $osiam::ensure == 'present' {
-            Class['osiam::postgresql::install'] -> Class['osiam::postgresql::user'] ->
-            Class['osiam::postgresql::database']
-        } else {
-            Class['osiam::postgresql::database'] -> Class['osiam::postgresql::user'] ->
-            Class['osiam::postgresql::install']
-        }
-    } else {
-        fail('Unsupported Operatingsystem')
-    }
-
 }

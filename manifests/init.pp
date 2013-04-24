@@ -67,7 +67,9 @@ class osiam (
             }
         }
         if $osiam::installdb {
-            class { 'osiam::postgresql': }
+            class { 'osiam::postgresql::install': }
+            class { 'osiam::postgresql::user': }
+            class { 'osiam::postgresql::database': }
         }
         if $osiam::installas {
             class { 'osiam::tomcat::install': }

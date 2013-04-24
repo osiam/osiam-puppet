@@ -20,7 +20,7 @@
 # Authors:
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
-class osiam::postgresql::database {
+class osiam::postgresql::database inherits osiam::params {
     if $osiam::ensure == 'present' {
         exec { "createdatabase_$osiam::dbname":
             command => "/usr/bin/psql -U postgres -c \
@@ -28,6 +28,7 @@ class osiam::postgresql::database {
             unless	=> "/usr/bin/psql -U postgres -c \
                         \"SELECT * FROM pg_database WHERE datname='${osiam::dbname}';\" | \
                         /bin/grep ${osiam::dbname}",
+            require => Class['osiam::postgresql::user'],
         }
         exec { "alterdatabase_${osiam::dbname}":
             command	=>  "/usr/bin/psql -U postgres -c \
@@ -38,6 +39,7 @@ class osiam::postgresql::database {
                             AND pg_database.datname = '${osiam::dbname}' \
                             AND pg_roles.rolname='${osiam::dbuser}';\" | \
                         /bin/grep ${osiam::dbname}",
+            require => Class['osiam::postgresql::user'],
         }
     } else { 
         exec { "dropdatabase_${osiam::dbname}":
@@ -45,6 +47,7 @@ class osiam::postgresql::database {
             onlyif  => "/usr/bin/psql -U postgres -c \
                         \"SELECT * FROM pg_database WHERE datname='${osiam::dbname}';\" \
                         | /bin/grep ${osiam::dbname}",
+            before => Class['osiam::postgresql::user'],
         }
     }
 }
