@@ -73,12 +73,16 @@ class osiam (
 
         if $osiam::installmaven {
             package { 'maven2':
-                ensure => 'present',
+                ensure => $osiam::ensure,
             }
         }
 
         if $osiam::installas {
             class { 'osiam::tomcat::install': }
+        }
+    }
+    class config {
+        if $osiam::installas {
             class { 'osiam::tomcat::config': }
         }
     }
@@ -122,6 +126,9 @@ class osiam (
 
     class { 'install':
         stage => 'install',
+    }
+    class { 'config': 
+        stage => 'main',
     }
     class { 'deploy':
         stage => 'main',

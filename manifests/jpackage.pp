@@ -13,7 +13,6 @@ class osiam::jpackage {
                 path        => '/usr/bin',
                 command     => 'yum clean all',
                 refreshonly => true,
-                before      => Package['tomcat7'],
                 subscribe   => File['/etc/yum.repos.d/jpackage.repo'],
             }
 
@@ -21,7 +20,6 @@ class osiam::jpackage {
                 path        => '/bin',
                 command     => 'rpm --import http://www.jpackage.org/jpackage.asc',
                 refreshonly => true,
-                before      => Package['tomcat7'],
                 subscribe   => File['/etc/yum.repos.d/jpackage.repo'],
             }
         }
