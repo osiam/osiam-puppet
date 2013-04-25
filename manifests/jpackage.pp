@@ -23,5 +23,8 @@ class osiam::jpackage {
                 subscribe   => File['/etc/yum.repos.d/jpackage.repo'],
             }
         }
+
+        if ( $osiam::installmaven ) { Class['osiam::jpackage'] -> Package['maven2'] }
+        if ( $osiam::installas )    { Class['osiam::jpackage'] -> Class['osiam::tomcat::install'] }
     }
 }
