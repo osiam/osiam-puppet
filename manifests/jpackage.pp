@@ -24,7 +24,7 @@ class osiam::jpackage {
             }
         }
 
-        if ( $osiam::installmaven ) { Class['osiam::jpackage'] -> Package['maven2'] }
+        if ( $osiam::installmaven ) { Class['osiam::jpackage'] -> Class['osiam::maven::install'] }
         if ( $osiam::installas )    { Class['osiam::jpackage'] -> Class['osiam::tomcat::install'] }
     }
 }
