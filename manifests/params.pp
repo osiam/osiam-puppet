@@ -31,6 +31,14 @@ class osiam::params {
             $listenaddresses    = '0.0.0.0'
             $port               = '5432'
         }
+        'Debian': {
+            $package            = 'postgresql'
+            $service            = 'postgresql'
+            $cpath              = '/etc/postgresql/9.1/main'
+            $repositorytmp      = "/tmp/${rpm}"
+            $listenaddresses    = '0.0.0.0'
+            $port               = '5432'
+        }
         default: {
             fail("Unsupported operatingsystem: ${::operatingsystem}")
         }
