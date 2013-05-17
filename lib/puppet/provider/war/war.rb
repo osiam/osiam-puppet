@@ -101,7 +101,7 @@ Puppet::Type.type(:war).provide(:war) do
 		groupid		= 'org/osiam/ng'
 		repository 	= 'http://repo.osiam.org'
 
-		repoappend = version =~ /^.*-SNAPSHOT$/ ? 'snaphots' : 'release'
+		repoappend = version =~ /^.*-SNAPSHOT$/ ? 'snapshots' : 'release'
 		repository = repository + '/' + repoappend
 		url = "#{repository}/#{groupid}/#{artifactid}/#{version}"
 
