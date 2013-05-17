@@ -9,36 +9,36 @@ Puppet::Type.type(:war).provide(:war) do
 	include Puppet::Util::Execution
 	include Puppet::Util::Warnings
 
+	def artifact
+		@resource[:path] + '/' + @resource[:artifactid] + '.war'
+	end
+
 	# Function to get file owner.
 	def owner
-		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
-		uid = File.stat("#{artifact}").uid
+		uid = File.stat(self.artifact).uid
 		Etc.getpwuid(uid).name
 	end
 	# Function to enforce file owner.
 	def owner=(owner)
-		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
 		owner = @resource[:owner]
 
 		begin
-			File.chown(Etc.getpwnam(owner).uid,nil,artifact)
+			File.chown(Etc.getpwnam(owner).uid,nil,self.artifact)
 		rescue => detail
 			raise Puppet::Error, "Failed to set owner to '#{owner}': #{detail}"
 		end
 	end
 	# Function to get file group.
 	def group
-		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
-		gid = File.stat("#{artifact}").gid
+		gid = File.stat(self.artifact).gid
 		Etc.getgrgid(gid).name
 	end
 	# Function to enforce file group.
 	def group=(group)
-		artifact = @resource[:path] + '/' + @resource[:artifactid] + '.war'
 		group = @resource[:group]
 
 		begin
-			File.chown(nil,Etc.getgrnam(group).gid,artifact)
+			File.chown(nil,Etc.getgrnam(group).gid,self.artifact)
 		rescue => detail
 			raise Puppet::Error, "Failed to set group to '#{group}': #{detail}"
 		end
@@ -54,7 +54,6 @@ Puppet::Type.type(:war).provide(:war) do
 		owner		= owner.nil? || owner.empty? ? "root" : owner
 		group		= @resource[:group]
 		group		= group.nil? || group.empty? ? "root" : group
-		artifact	= "#{path}/#{artifactid}.war"
 		groupid		= 'org.osiam.ng'
 		plugin		= "2.4"
 
@@ -67,7 +66,7 @@ Puppet::Type.type(:war).provide(:war) do
 		# Set maven parameters
 		mvn = "org.apache.maven.plugins:maven-dependency-plugin:#{plugin}:get -Dpackaging=war"
 		mvn = mvn + " -DgroupId=#{groupid} -DartifactId=#{artifactid} -Dversion=#{version}"
-		mvn = mvn + " -DremoteRepositories=#{repository} -Ddest='#{artifact}'"
+		mvn = mvn + " -DremoteRepositories=#{repository} -Ddest='" + self.artifact + "'"
 		
 		# Execute maven and download artifact
 		command = ["mvn #{mvn}"]
@@ -79,7 +78,7 @@ Puppet::Type.type(:war).provide(:war) do
 		end
 		# Change artifact permission
 		begin
-			File.chown(Etc.getpwnam(owner).uid,Etc.getgrnam(group).gid,artifact)
+			File.chown(Etc.getpwnam(owner).uid,Etc.getgrnam(group).gid,self.artifact)
 		rescue => detail
 			raise Puppet::Error, "Failed to set group to '#{group}': #{detail}"
 		end
@@ -88,10 +87,7 @@ Puppet::Type.type(:war).provide(:war) do
 	# Function to delete file.
 	# Will be called if ensure is set to 'absent'.
 	def destroy
-		artifactid	= @resource[:artifactid]
-		path		= @resource[:path]
-		artifact	= "#{path}/#{artifactid}.war"
-		File.delete(artifact)
+		File.delete(self.artifact)
 	end
 
 	# Function to check if file exists.
@@ -102,7 +98,6 @@ Puppet::Type.type(:war).provide(:war) do
 		version		= @resource[:version]
 		artifactid	= @resource[:artifactid]
 		path 		= @resource[:path]
-		artifact	= "#{path}/#{artifactid}.war"
 		groupid		= 'org/osiam/ng'
 		repository 	= 'http://repo.osiam.org'
 
@@ -113,7 +108,7 @@ Puppet::Type.type(:war).provide(:war) do
 
 		if File.exists?("#{path}/#{artifactid}.war")
 			# Get our artifacts md5sum
-			warmd5 = Digest::MD5.hexdigest(File.read("#{artifact}"))
+			warmd5 = Digest::MD5.hexdigest(File.read(self.artifact))
 
 			# Get newest artifacts md5sum (from repo)
 			# Download the index of #{repository}
