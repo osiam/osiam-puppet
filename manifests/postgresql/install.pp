@@ -22,21 +22,25 @@
 #
 class osiam::postgresql::install inherits osiam::params {
     if $osiam::ensure == 'present' {
-        exec { 'installpostgresrepo':
-            path    => '/bin:/usr/bin',
-            command => "wget -O ${osiam::params::repositorytmp} ${osiam::params::repository} && \
-                        yum install -y ${osiam::params::repositorytmp} && \
-                        rm -f ${osiam::params::repositorytmp}",
-            unless => "yum list installed pgdg-redhat92.noarch",
+        if $::operatingsystem == 'CentOS' {
+            exec { 'installpostgresrepo':
+                path    => '/bin:/usr/bin',
+                command => "wget -O ${osiam::params::repositorytmp} ${osiam::params::repository} && \
+                            yum install -y ${osiam::params::repositorytmp} && \
+                            rm -f ${osiam::params::repositorytmp}",
+                unless => "yum list installed pgdg-redhat92.noarch",
+                before => Package[$osiam::params::package],
+            }
+
+            exec { 'postgresqlinitdb':
+                command     => "/sbin/service ${osiam::params::service} initdb",
+                refreshonly => true,
+                subscribe   => Package[$osiam::params::package],
+                before      => File["${osiam::params::cpath}/postgresql.conf"],
+            }
         }
 
-        exec { 'postgresqlinitdb':
-            command     => "/sbin/service ${osiam::params::service} initdb",
-            refreshonly => true,
-        }
-
-        Exec['installpostgresrepo'] -> Package[$osiam::params::package] ~> Exec['postgresqlinitdb'] ->
-        File["${osiam::params::cpath}/postgresql.conf"] ->
+        Package[$osiam::params::package] -> File["${osiam::params::cpath}/postgresql.conf"] ->
         File["${osiam::params::cpath}/pg_hba.conf"] -> Service[$osiam::params::service]  
 
         File["${osiam::params::cpath}/postgresql.conf"] ~> Service[$osiam::params::service]
