@@ -22,7 +22,7 @@
 class osiam::tomcat::config inherits osiam::params {
     $shared_loader = $osiam::homedir
     file { 'catalina.properties':
-        path    => '/usr/share/tomcat7/conf/catalina.properties',
+        path    => "${osiam::params::tomcat_conf_path}/catalina.properties",
         ensure  => $osiam::ensure,
         content => template('osiam/catalina.properties.erb'),
         require => Class['osiam::tomcat::install'],

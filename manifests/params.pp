@@ -34,6 +34,7 @@ class osiam::params {
             $java_package       = 'java-1.7.0-openjdk'
             $tomcat_package     = 'tomcat7'
             $tomcat_service     = 'tomcat7'
+            $tomcat_conf_path   = '/usr/share/tomcat7/conf'
         }
         'Debian': {
             $package            = 'postgresql'
@@ -46,6 +47,7 @@ class osiam::params {
             $java_package       = 'openjdk-7-jdk'
             $tomcat_package     = 'tomcat7'
             $tomcat_service     = 'tomcat7'
+            $tomcat_conf_path   = '/var/lib/tomcat7/conf'
         }
         default: {
             fail("Unsupported operatingsystem: ${::operatingsystem}")

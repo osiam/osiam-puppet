@@ -66,7 +66,7 @@ class osiam::postgresql::install inherits osiam::params {
         mode	=> '0644',
         owner	=> 'postgres',
         group	=> 'postgres',
-        content	=> template('osiam/postgresql.conf.erb'),
+        content	=> template("osiam/postgresql_${::operatingsystem}.conf.erb"),
     }
     
     file { "${osiam::params::cpath}/pg_hba.conf":
