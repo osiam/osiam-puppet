@@ -19,25 +19,21 @@
 # Authors:
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
-class osiam::tomcat::install {
-    if ( $::operatingsystem == 'CentOS' ) and ( $::lsbmajdistrelease == '6') {
-
-        if $osiam::installjava {
-            package { 'java-1.7.0-openjdk':
-                ensure => $osiam::ensure,
-                before => Package['tomcat7'],
-            }
+class osiam::tomcat::install inherits osiam::params {
+    if $osiam::installjava {
+        package { $osiam::params::java_package:
+            ensure => $osiam::ensure,
+            before => Package[$osiam::params::tomcat_package],
         }
+    }
 
-        package { 'tomcat7':
-            ensure  => $osiam::ensure,
-            require => Class['osiam::jpackage'],
-        }
+    package { $osiam::params::tomcat_package:
+        ensure  => $osiam::ensure,
+    }
 
-        firewall { '099 tomcat':
-            action => accept,
-            dport  => '8080',
-            proto  => 'tcp',
-        }
+    firewall { '099 tomcat':
+        action => accept,
+        dport  => '8080',
+        proto  => 'tcp',
     }
 }

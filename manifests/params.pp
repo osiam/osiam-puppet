@@ -30,6 +30,10 @@ class osiam::params {
             $repositorytmp      = "/tmp/${rpm}"
             $listenaddresses    = '0.0.0.0'
             $port               = '5432'
+
+            $java_package       = 'java-1.7.0-openjdk'
+            $tomcat_package     = 'tomcat7'
+            $tomcat_service     = 'tomcat7'
         }
         'Debian': {
             $package            = 'postgresql'
@@ -38,6 +42,10 @@ class osiam::params {
             $repositorytmp      = "/tmp/${rpm}"
             $listenaddresses    = '0.0.0.0'
             $port               = '5432'
+
+            $java_package       = 'openjdk-7-jdk'
+            $tomcat_package     = 'tomcat7'
+            $tomcat_service     = 'tomcat7'
         }
         default: {
             fail("Unsupported operatingsystem: ${::operatingsystem}")
