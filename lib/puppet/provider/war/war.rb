@@ -125,7 +125,7 @@ Puppet::Type.type(:war).provide(:war) do
 			debug "Exit Status = #{status.exitstatus}"
 
 			# return true if md5sum == warmd5
-			return md5sum == warmd5
+			return md5sum == warmd5 ? true : false
 		else
 			return false
 		end
