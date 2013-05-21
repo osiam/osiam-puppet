@@ -28,6 +28,17 @@ class osiam::tomcat::config inherits osiam::params {
         require => Class['osiam::tomcat::install'],
         notify  => Service[$osiam::params::tomcat_service],
     }
+
+    if $::operatingsystem == "Debian" {
+        file { 'tomcat-init':
+            path    => '/etc/init.d/tomcat7',
+            ensure  => $osiam::ensure,
+            source  => 'puppet:///modules/osiam/tomcat7',
+            require => Class['osiam::tomcat::install'],
+            notify  => Service[$osiam::params::tomcat_service],
+        }
+    }
+
     service { $osiam::params::tomcat_service:
         ensure  => $osiam::service_ensure,
         enable  => $osiam::service_enable,
