@@ -35,7 +35,7 @@ class osiam::database {
                             WEB-INF/classes/sql/init.sql > ${osiam::homedir}/install-schema.sql",
                 unless  => "unzip -p ${osiam::webappsdir}/authorization-server.war \
                             WEB-INF/classes/sql/init.sql > /tmp/init.sql && \
-                            test \"$(md5sum /tmp/init.sql | awk '{print \$1}')\" == \
+                            test \"$(md5sum /tmp/init.sql | awk '{print \$1}')\" = \
                             \"$(md5sum ${osiam::homedir}/install-schema.sql | awk '{print \$1}')\"",
                 require => [
                                 File[$osiam::homedir],
@@ -50,7 +50,7 @@ class osiam::database {
                             WEB-INF/classes/sql/drop.sql > ${osiam::homedir}/remove-schema.sql",
                 unless  => "unzip -p ${osiam::webappsdir}/authorization-server.war \
                             WEB-INF/classes/sql/drop.sql > /tmp/drop.sql && \
-                            test \"$(md5sum /tmp/drop.sql | awk '{print \$1}')\" == \
+                            test \"$(md5sum /tmp/drop.sql | awk '{print \$1}')\" = \
                             \"$(md5sum ${osiam::homedir}/remove-schema.sql | awk '{print \$1}')\"",
                 require => [
                                 File[$osiam::homedir],
