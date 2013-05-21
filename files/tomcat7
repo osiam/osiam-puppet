@@ -53,7 +53,6 @@ fi
 # Run Tomcat 7 as this user ID and group ID
 TOMCAT7_USER=tomcat7
 TOMCAT7_GROUP=tomcat7
-JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx1024m"
 
 # this is a work-around until there is a suitable runtime replacement 
 # for dpkg-architecture for arch:all packages
@@ -145,6 +144,7 @@ if [ -z "${JSSE_HOME}" -a -r "${JAVA_HOME}/jre/lib/jsse.jar" ]; then
     JSSE_HOME="${JAVA_HOME}/jre/"
 fi
 
+JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx1024m"
 catalina_sh() {
 	# Escape any double quotes in the value of JAVA_OPTS
 	JAVA_OPTS="$(echo $JAVA_OPTS | sed 's/\"/\\\"/g')"
