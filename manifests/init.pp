@@ -92,15 +92,38 @@ class osiam (
             mode   => '0744',
         }
 
+        file { 'db-config.properties':
+            ensure  => $osiam::ensure,
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0744',
+            path    => "${osiam::homedir}/db-config.properties",
+            content => template('osiam/db-config.properties.erb'),
+            notify  => Service[$osiam::tomcatservice],
+            require => File[$osiam::homedir],
+        }
+
         war { 'osiam-server':
             ensure  => $osiam::ensure,
             version => $osiam::version,
             path    => $osiam::webappsdir,
             owner   => $osiam::owner,
             group   => $osiam::group,
+            require => File['db-config.properties'],
         }
 
-        class { 'osiam::database': }
+
+        dbschema { 'osiam-server':
+            ensure        => $osiam::ensure,
+            artifactpath  => $osiam::webappsdir,
+            osiampath     => $osiam::homedir,
+            dbhost        => $osiam::dbhost,
+            dbname        => $osiam::dbname,
+            dbuser        => $osiam::dbuser,
+            dbpassword    => $osiam::dbpassword,
+            dbforceschema => $osiam::dbforceschema,
+            require       => War['osiam-server'],
+        }
         
         war { 'oauth2-client':
             ensure  => $osiam::ensure,
