@@ -92,7 +92,7 @@ class osiam (
             mode   => '0744',
         }
 
-        war { 'authorization-server':
+        war { 'osiam-server':
             ensure  => $osiam::ensure,
             version => $osiam::version,
             path    => $osiam::webappsdir,

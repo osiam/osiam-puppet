@@ -2,7 +2,7 @@
 #
 # This class handles database initialization, actualization and cleanup. It will check for a specific
 # database table. If that table is missing this class will unzip an initialization script from the
-# authorization-server.war file and execute it.
+# osiam-server.war file and execute it.
 #
 # Requires:
 #   postgresql 9.2 installed
@@ -27,34 +27,34 @@ class osiam::database {
 
     case $osiam::ensure {
         present: {
-            # Check if there is a new init.sql script inside the authorization-server.war and
+            # Check if there is a new init.sql script inside the osiam-server.war and
             # extract it to ${osiam::homedir}/install-schema.sql
             exec { 'extract-install-schema':
                 path    => '/usr/bin',
-                command => "unzip -p ${osiam::webappsdir}/authorization-server.war \
+                command => "unzip -p ${osiam::webappsdir}/osiam-server.war \
                             WEB-INF/classes/sql/init.sql > ${osiam::homedir}/install-schema.sql",
-                unless  => "unzip -p ${osiam::webappsdir}/authorization-server.war \
+                unless  => "unzip -p ${osiam::webappsdir}/osiam-server.war \
                             WEB-INF/classes/sql/init.sql > /tmp/init.sql && \
                             test \"$(md5sum /tmp/init.sql | awk '{print \$1}')\" = \
                             \"$(md5sum ${osiam::homedir}/install-schema.sql | awk '{print \$1}')\"",
                 require => [
                                 File[$osiam::homedir],
-                                War['authorization-server'],
+                                War['osiam-server'],
                            ],
             }
-            # Check if there is a new drop.sql script inside the authorization-server.war and
+            # Check if there is a new drop.sql script inside the osiam-server.war and
             # extract it to ${osiam::homedir}/remove-schema.sql
             exec { 'extract-remove-schema':
                 path    => '/usr/bin',
-                command => "unzip -p ${osiam::webappsdir}/authorization-server.war \
+                command => "unzip -p ${osiam::webappsdir}/osiam-server.war \
                             WEB-INF/classes/sql/drop.sql > ${osiam::homedir}/remove-schema.sql",
-                unless  => "unzip -p ${osiam::webappsdir}/authorization-server.war \
+                unless  => "unzip -p ${osiam::webappsdir}/osiam-server.war \
                             WEB-INF/classes/sql/drop.sql > /tmp/drop.sql && \
                             test \"$(md5sum /tmp/drop.sql | awk '{print \$1}')\" = \
                             \"$(md5sum ${osiam::homedir}/remove-schema.sql | awk '{print \$1}')\"",
                 require => [
                                 File[$osiam::homedir],
-                                War['authorization-server'],
+                                War['osiam-server'],
                            ],
             }
 
