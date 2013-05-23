@@ -3,12 +3,12 @@ osiam-puppet
 
 This repository conatins the [OSIAM Puppet Manifest](manifests/init.pp).
 
-The [manifest](manifests/init.pp) currently deploys the OSIAM *authorization-server* and the *oauth2-client* war files to an existing application server (tested with Tomcat 7) and initializes the database when `$ensure` is set to "present" or removes the files from their installation directories and cleans the database when `$ensure` is set to "absend". By default this module will install and configure PostgreSQL 9.2 and Tomcat 7.
+The [manifest](manifests/init.pp) currently deploys the OSIAM *osiam-server* war files to an existing application server (tested with Tomcat 7) and initializes the database when `$ensure` is set to "present" or removes the files from their installation directories and cleans the database when `$ensure` is set to "absend". By default this module will install and configure PostgreSQL 9.2 and Tomcat 7.
 
 Prerequisite
 ============
 Host:
-* OS: Centos 6
+* OS: Centos 6, Debian
 * maven
 * unzip
 
