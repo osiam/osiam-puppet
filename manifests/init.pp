@@ -124,15 +124,6 @@ class osiam (
             dbforceschema => $osiam::dbforceschema,
             require       => War['osiam-server'],
         }
-        
-        war { 'oauth2-client':
-            ensure  => $osiam::ensure,
-            version => $osiam::version,
-            path    => $osiam::webappsdir,
-            owner   => $osiam::owner,
-            group   => $osiam::group,
-        }
-
     }
 
     if $ensure == 'present' {
