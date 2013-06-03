@@ -29,7 +29,11 @@ Puppet::Type.type(:dbschema).provide(:dbschema) do
 		# Extract Schema
 		command = [ "unzip -p #{@artifact} #{source} > #{target}" ]
 		output, status	= Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
-		debug output if status.exitstatus == 0
+        # Opens the sql file and replaces localhost with a propper hostname
+        editedSQLFile = File.read(target).gsub(/localhost/, dbhost)
+        # Overrides the original SQL File with the edited string...
+        File.open(target, "w"){|file| file.write(editedSQLFile)}
+        debug output if status.exitstatus == 0
 		debug "Exit Status = #{status.exitstatus}"
 		if status.exitstatus != 0
 			raise Puppet::Error, "Failed to extract OSIAM database schema: #{output}"
