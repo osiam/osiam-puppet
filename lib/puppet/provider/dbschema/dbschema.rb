@@ -3,6 +3,7 @@ require 'puppet/resource/catalog'
 require 'digest/md5'
 require 'fileutils'
 require 'etc'
+require 'facter'
 
 Puppet::Type.type(:dbschema).provide(:dbschema) do
 	desc "dbschema provider."
@@ -29,8 +30,10 @@ Puppet::Type.type(:dbschema).provide(:dbschema) do
 		# Extract Schema
 		command = [ "unzip -p #{@artifact} #{source} > #{target}" ]
 		output, status	= Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
+        # gets the hostname set in a global variable
+        hostname = Facter['my_fact'].fqdn
         # Opens the sql file and replaces localhost with a propper hostname
-        editedSQLFile = File.read(target).gsub(/localhost/, dbhost)
+        editedSQLFile = File.read(target).gsub(/localhost/, hostname)
         # Overrides the original SQL File with the edited string...
         File.open(target, "w"){|file| file.write(editedSQLFile)}
         debug output if status.exitstatus == 0
