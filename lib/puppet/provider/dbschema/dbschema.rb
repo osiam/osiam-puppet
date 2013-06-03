@@ -31,7 +31,7 @@ Puppet::Type.type(:dbschema).provide(:dbschema) do
 		command = [ "unzip -p #{@artifact} #{source} > #{target}" ]
 		output, status	= Puppet::Util::SUIDManager.run_and_capture(command, 'root', 'root')
         # gets the hostname set in a global variable
-        hostname = Facter['my_fact'].fqdn
+        hostname = Facter['fqdn'].value
         # Opens the sql file and replaces localhost with a propper hostname
         editedSQLFile = File.read(target).gsub(/localhost/, hostname)
         # Overrides the original SQL File with the edited string...
