@@ -135,6 +135,7 @@ class osiam (
 
         Registerclient <<| tag == "${osiam::client_tag}" |>> {
             dbconnection => $dbconnection,
+            require      => Dbschema['osiam-server'],
             notify       => Service[$osiam::tomcatservice],
         }
 
