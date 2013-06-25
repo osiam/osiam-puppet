@@ -37,6 +37,8 @@ class osiam::params {
             $tomcat_conf_path   = '/usr/share/tomcat7/conf'
             $tomcat_owner       = 'tomcat'
             $tomcat_group       = 'tomcat'
+	    $tomcat_storePass   = 'changeit'
+	    $tomcat_keyPass     = 'changeit'
         }
         'Debian': {
             $package            = 'postgresql'
@@ -52,6 +54,8 @@ class osiam::params {
             $tomcat_conf_path   = '/var/lib/tomcat7/conf'
             $tomcat_owner       = 'tomcat7'
             $tomcat_group       = 'tomcat7'
+	    $tomcat_storePass   = 'changeit'
+            $tomcat_keyPass     = 'changeit'
         }
         default: {
             fail("Unsupported operatingsystem: ${::operatingsystem}")
