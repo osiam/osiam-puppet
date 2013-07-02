@@ -133,7 +133,7 @@ class osiam (
             password => $osiam::dbpassword,
         }
 
-        Registerclient <<| tag == "${osiam::client_tag}" |>> {
+        Osiamclient <<| tag == "${osiam::client_tag}" |>> {
             dbconnection => $dbconnection,
             require      => Dbschema['osiam-server'],
             notify       => Service[$osiam::tomcatservice],
