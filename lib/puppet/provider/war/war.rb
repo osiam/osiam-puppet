@@ -54,7 +54,7 @@ Puppet::Type.type(:war).provide(:war) do
 		owner		= owner.nil? || owner.empty? ? "root" : owner
 		group		= @resource[:group]
 		group		= group.nil? || group.empty? ? "root" : group
-		groupid		= 'org.osiam.ng'
+		groupid		= 'org.osiam'
 		plugin		= "2.4"
 
 		if version =~ /^.*-SNAPSHOT$/
