@@ -59,6 +59,7 @@ class osiam (
     $tomcatservice  = 'tomcat7',
     $installjava    = true,
     $installmaven   = true,
+    $client_tag     = 'osiam-client',
 ) {
     class install {
         if $osiam::installdb {
@@ -124,6 +125,20 @@ class osiam (
             dbforceschema => $osiam::dbforceschema,
             require       => War['osiam-server'],
         }
+
+        $dbconnection = {
+            host     => $osiam::dbhost,
+            name     => $osiam::dbname,
+            user     => $osiam::dbuser,
+            password => $osiam::dbpassword,
+        }
+
+        Registerclient <<| tag == "${osiam::client_tag}" |>> {
+            dbconnection => $dbconnection,
+            require      => Dbschema['osiam-server'],
+            notify       => Service[$osiam::tomcatservice],
+        }
+
     }
 
     if $ensure == 'present' {
