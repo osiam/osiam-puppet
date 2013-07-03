@@ -56,6 +56,7 @@ class osiam (
     $webappsdir     = '/var/lib/tomcat7/webapps',
     $owner          = $osiam::params::tomcat_owner,
     $group          = $osiam::params::tomcat_group,
+    $forcessl       = false,
     $tomcatservice  = 'tomcat7',
     $installjava    = true,
     $installmaven   = true,

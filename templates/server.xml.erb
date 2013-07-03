@@ -69,7 +69,10 @@
     -->
     <Connector port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
-               redirectPort="8443" />
+                <%- if @forcessl -%>
+                    redirectPort="8443"
+                <%- end -%>
+    />
     <!-- A "Connector" using the shared thread pool-->
     <!--
     <Connector executor="tomcatThreadPool"
