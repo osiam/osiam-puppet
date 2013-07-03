@@ -98,7 +98,7 @@ Puppet::Type.type(:war).provide(:war) do
 		version		= @resource[:version]
 		artifactid	= @resource[:artifactid]
 		path 		= @resource[:path]
-		groupid		= 'org/osiam/ng'
+		groupid		= 'org/osiam'
 		repository 	= 'http://repo.osiam.org'
 
 		repoappend = version =~ /^.*-SNAPSHOT$/ ? 'snapshots' : 'release'
