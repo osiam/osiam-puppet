@@ -60,6 +60,7 @@ class osiam::tomcat::config inherits osiam::params {
         group   => $osiam::params::tomcat_group,
         mode    => '0644',
 	content => template('osiam/server.xml.erb'),
+            notify  => Service[$osiam::params::tomcat_service],
     }
 
     file { "web.xml":
@@ -69,6 +70,7 @@ class osiam::tomcat::config inherits osiam::params {
         group   => $osiam::params::tomcat_group,
         mode    => '0644',
         content => template('osiam/web.xml.erb'),
+            notify  => Service[$osiam::params::tomcat_service],
     }
 
 
