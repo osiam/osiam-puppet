@@ -48,8 +48,9 @@ class osiam::tomcat::config inherits osiam::params {
     }
 
     exec { 'create key':
-	path	=> '/usr/bin/',
+	path        => '/usr/bin/',
         command => "keytool -genkey -alias tomcat -keyalg RSA -keystore /etc/ssl/.keystore -storepass ${osiam::params::tomcat_storePass} -keypass ${osiam::params::tomcat_keyPass} -dname \"CN=172.26.5.122, OU=OSIAM, O=tarent AG, L=Bonn, ST=NRW, C=DE\"",
+        unless  => "keytool -list -keystore /etc/ssl/.keystore -storepass ${osiam::params::tomcat_storePass} -alias tomcat",
     }
 
     file { "server.xml":
