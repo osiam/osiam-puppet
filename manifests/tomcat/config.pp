@@ -47,11 +47,6 @@ class osiam::tomcat::config inherits osiam::params {
         require => Class['osiam::tomcat::install'],
     }
 
-    exec { 'open ssl port':
-	path    => '/sbin/',
-	command => "iptables -I INPUT -p tcp --dport 8443 --syn -j ACCEPT",
-    }
-
     exec { 'create key':
 	path	=> '/usr/bin/',
         command => "keytool -genkey -alias tomcat -keyalg RSA -keystore /etc/ssl/.keystore -storepass ${osiam::params::tomcat_storePass} -keypass ${osiam::params::tomcat_keyPass} -dname \"CN=172.26.5.122, OU=OSIAM, O=tarent AG, L=Bonn, ST=NRW, C=DE\"",
