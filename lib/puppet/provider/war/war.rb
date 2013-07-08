@@ -58,9 +58,9 @@ Puppet::Type.type(:war).provide(:war) do
 		plugin		= "2.4"
 
 		if version =~ /^.*-SNAPSHOT$/
-			repository = 'http://repo.osiam.org/snapshots'
+			repository = 'http://maven-repo.evolvis.org/snapshots'
 		else
-			repository = 'http://repo.osiam.org/release'
+			repository = 'http://maven-repo.evolvis.org/release'
 		end
 
 		# Set maven parameters
@@ -99,7 +99,7 @@ Puppet::Type.type(:war).provide(:war) do
 		artifactid	= @resource[:artifactid]
 		path 		= @resource[:path]
 		groupid		= 'org/osiam'
-		repository 	= 'http://repo.osiam.org'
+		repository 	= 'http://maven-repo.evolvis.org'
 
 		repoappend = version =~ /^.*-SNAPSHOT$/ ? 'snapshots' : 'release'
 		repository = repository + '/' + repoappend
