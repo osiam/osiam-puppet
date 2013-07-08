@@ -1,6 +1,6 @@
 require 'puppet/type'
 
-Puppet::Type.newtype(:registerclient) do
+Puppet::Type.newtype(:osiamclient) do
     @doc = "Install OSIAM database schema"
 
     ensurable do
@@ -13,16 +13,16 @@ Puppet::Type.newtype(:registerclient) do
     end
 
     newparam(:hostname) do
-        desc "Path to osiam directory."
+        desc "Client hostname. Used for redirect URI."
         isnamevar
     end
-    newparam(:uuid) do
-        desc "Path to osiam directory."
+    newparam(:id) do
+        desc "Client ID. String expected."
     end
     newparam(:secret) do
-        desc "Hostname of database server."
+        desc "Client secret. String expected."
     end
     newparam(:dbconnection) do
-        desc "Hostname of database server."
+        desc "Expect hash with the following keys: host, name, user, password."
     end
 end

@@ -6,8 +6,8 @@ require 'etc'
 require 'facter'
 require 'yaml'
 
-Puppet::Type.type(:registerclient).provide(:registerclient) do
-	desc "registerclient provider."
+Puppet::Type.type(:osiamclient).provide(:osiamclient) do
+	desc "osiamclient provider."
 	include Puppet::Util::Execution
 	include Puppet::Util::Warnings
 
@@ -43,7 +43,7 @@ Puppet::Type.type(:registerclient).provide(:registerclient) do
 
     def delete_similar
         [
-            { :key => 'id',             :value => @resource[:uuid] },
+            { :key => 'id',             :value => @resource[:id] },
             { :key => 'redirect_uri',   :value => redirect_uri },
             { :key => 'client_secret',  :value => @resource[:secret] },
         ].each do |item|
@@ -57,7 +57,7 @@ Puppet::Type.type(:registerclient).provide(:registerclient) do
         self.delete_similar
 
         output = %x{#{psql} -c "INSERT INTO osiam_client VALUES(#{hibernate_sequence},
-            '#{@resource[:uuid]}',
+            '#{@resource[:id]}',
             '#{redirect_uri}',
             '#{@resource[:secret]}',
             '2342','2342');"}
@@ -76,15 +76,15 @@ Puppet::Type.type(:registerclient).provide(:registerclient) do
 	end
 
 	def exists?
-        debug "registerclient hostname:\t#{@resource[:hostname]}"
-        debug "registerclient uuid:\t#{@resource[:uuid]}"
-        debug "registerclient secret:\t#{@resource[:secret]}"
-        debug "registerclient database:\t#{@resource[:dbconnection]['host']}"
+        debug "osiamclient hostname:\t#{@resource[:hostname]}"
+        debug "osiamclient id:\t#{@resource[:id]}"
+        debug "osiamclient secret:\t#{@resource[:secret]}"
+        debug "osiamclient database:\t#{@resource[:dbconnection]['host']}"
 
         output = %x{#{psql} -c "SELECT id FROM osiam_client WHERE \
-            id              = '#{@resource[:uuid]}' AND
+            id              = '#{@resource[:id]}' AND
             redirect_uri    = '#{redirect_uri}' AND
             client_secret   = '#{@resource[:secret]}'"}
-        output =~ /#{@resource[:uuid]}/ ? true : false
+        output =~ /#{@resource[:id]}/ ? true : false
 	end
 end

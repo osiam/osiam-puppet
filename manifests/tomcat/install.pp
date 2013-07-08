@@ -36,4 +36,10 @@ class osiam::tomcat::install inherits osiam::params {
         dport  => '8080',
         proto  => 'tcp',
     }
+
+    firewall { '100 tomcat':
+        action => accept,
+        dport  => '8443',
+        proto  => 'tcp',
+    }
 }
