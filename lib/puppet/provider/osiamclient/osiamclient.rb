@@ -37,6 +37,9 @@ Puppet::Type.type(:osiamclient).provide(:osiamclient) do
         output = %x{#{psql} -c "DELETE FROM osiam_client_scopes WHERE id = #{internal_id};"}
         raise Puppet::Error, "Failed to delete client scope: #{output}" if $?.exitstatus != 0
 
+        output = %x{#{psql} -c "DELETE FROM osiam_client_grants WHERE id = #{internal_id};"}
+        raise Puppet::Error, "Failed to delete client grants: #{output}" if $?.exitstatus != 0
+
         output = %x{#{psql} -c "DELETE FROM osiam_client WHERE internal_id = #{internal_id};"} 
         raise Puppet::Error, "Failed to delete client: #{output}" if $?.exitstatus != 0
     end
