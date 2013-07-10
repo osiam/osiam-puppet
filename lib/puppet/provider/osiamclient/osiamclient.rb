@@ -69,6 +69,12 @@ Puppet::Type.type(:osiamclient).provide(:osiamclient) do
             raise Puppet::Error, "Failed to add client scope: #{output}" if $?.exitstatus != 0
         end
 
+        [ 'authorization_code', 'refresh-token' ].each do |action|
+            output = %x{#{psql} -c "INSERT INTO osiam_client_grants \
+                VALUES(#{hibernate_sequence}, '#{action}');"}
+            raise Puppet::Error, "Failed to add client scope: #{output}" if $?.exitstatus != 0
+        end
+
         self.hibernate_sequence_up
     end
 
