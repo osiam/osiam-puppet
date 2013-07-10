@@ -60,7 +60,7 @@ Puppet::Type.type(:osiamclient).provide(:osiamclient) do
             '#{@resource[:id]}',
             '#{redirect_uri}',
             '#{@resource[:secret]}',
-            '2342','2342');"}
+            '2342','2342','1337','f');"}
         raise Puppet::Error, "Failed to add client: #{output}" if $?.exitstatus != 0
 
         [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].each do |action|
