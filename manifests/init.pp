@@ -99,7 +99,7 @@ class osiam (
             owner   => 'root',
             group   => 'root',
             mode    => '0744',
-            path    => "${osiam::homedir}/db-config.properties",
+            path    => "${osiam::homedir}/osiam.properties",
             content => template('osiam/db-config.properties.erb'),
             notify  => Service[$osiam::tomcatservice],
             require => File[$osiam::homedir],
