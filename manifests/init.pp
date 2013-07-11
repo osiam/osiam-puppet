@@ -94,13 +94,13 @@ class osiam (
             mode   => '0744',
         }
 
-        file { 'db-config.properties':
+        file { 'osiam.properties':
             ensure  => $osiam::ensure,
             owner   => 'root',
             group   => 'root',
             mode    => '0744',
             path    => "${osiam::homedir}/osiam.properties",
-            content => template('osiam/db-config.properties.erb'),
+            content => template('osiam/osiam.properties.erb'),
             notify  => Service[$osiam::tomcatservice],
             require => File[$osiam::homedir],
         }
@@ -111,7 +111,7 @@ class osiam (
             path    => $osiam::webappsdir,
             owner   => $osiam::owner,
             group   => $osiam::group,
-            require => File['db-config.properties'],
+            require => File['osiam.properties'],
         }
 
 
