@@ -37,6 +37,9 @@ Puppet::Type.type(:osiamclient).provide(:osiamclient) do
         output = %x{#{psql} -c "DELETE FROM osiam_client_scopes WHERE id = #{internal_id};"}
         raise Puppet::Error, "Failed to delete client scope: #{output}" if $?.exitstatus != 0
 
+        output = %x{#{psql} -c "DELETE FROM osiam_client_grants WHERE id = #{internal_id};"}
+        raise Puppet::Error, "Failed to delete client grants: #{output}" if $?.exitstatus != 0
+
         output = %x{#{psql} -c "DELETE FROM osiam_client WHERE internal_id = #{internal_id};"} 
         raise Puppet::Error, "Failed to delete client: #{output}" if $?.exitstatus != 0
     end
@@ -60,11 +63,17 @@ Puppet::Type.type(:osiamclient).provide(:osiamclient) do
             '#{@resource[:id]}',
             '#{redirect_uri}',
             '#{@resource[:secret]}',
-            '2342','2342');"}
+            '2342','2342','1337','f');"}
         raise Puppet::Error, "Failed to add client: #{output}" if $?.exitstatus != 0
 
         [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].each do |action|
             output = %x{#{psql} -c "INSERT INTO osiam_client_scopes \
+                VALUES(#{hibernate_sequence}, '#{action}');"}
+            raise Puppet::Error, "Failed to add client scope: #{output}" if $?.exitstatus != 0
+        end
+
+        [ 'authorization_code', 'refresh-token' ].each do |action|
+            output = %x{#{psql} -c "INSERT INTO osiam_client_grants \
                 VALUES(#{hibernate_sequence}, '#{action}');"}
             raise Puppet::Error, "Failed to add client scope: #{output}" if $?.exitstatus != 0
         end
