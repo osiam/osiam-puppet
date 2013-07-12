@@ -14,18 +14,18 @@ Host:
 
 Usage
 ============
-Use the following example to install everything including PostgreSQL 9.2 and Tomcat 7. This will install OSIAM version 0.3 and initialize the database 'osiam' on the same maschine. War files will be deployed to `/var/lib/tomcat7/webapps`
+Use the following example to install everything including PostgreSQL 9.2 and Tomcat 7. This will install OSIAM version <OSIAM-VERSION> and initialize the database 'osiam' on the same maschine. War files will be deployed to `/var/lib/tomcat7/webapps`
 ```puppet
   class { 'osiam':
         ensure  => present,
-        version => '0.3',
+        version => '<OSIAM-VERSION>',
   }
 ```
 If you want to manage your database and application server by yourself use this example:
 ```puppet
   class { 'osiam':
         ensure          => present,
-        version         => '0.3',
+        version         => '<OSIAM-VERSION>',
         installdb       => false,
         dbhost          => '<database_host>',
         dbname          => '<database_name>',
