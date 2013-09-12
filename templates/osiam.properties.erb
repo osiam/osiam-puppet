@@ -3,6 +3,7 @@
 #
 # Database properties
 db.driver=org.postgresql.Driver
+db.dialect=org.hibernate.dialect.PostgresPlusDialect
 db.url=jdbc:postgresql://<%= scope.lookupvar('osiam::dbhost') %>:5432/<%= scope.lookupvar('osiam::dbname') %>
 db.username=<%= scope.lookupvar('osiam::dbuser') %>
 db.password=<%= scope.lookupvar('osiam::dbpassword') %>
