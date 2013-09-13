@@ -28,6 +28,10 @@ Puppet::Type.newtype(:war) do
         desc "Location where the war file will be saved."
     end
 
+    newparam(:id) do
+        desc "Build timestamp and buildnumber. Useful for getting specific snapshot releases."
+    end
+
     # Create properties. These will call a provider function to check
     # for a value and another function to enforce it.
     #

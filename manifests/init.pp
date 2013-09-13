@@ -43,6 +43,7 @@
 #
 class osiam (
     $version,  
+    $id             = undef,
     $ensure         = present,
     $homedir        = '/etc/osiam',
     $installdb      = true,
@@ -108,6 +109,7 @@ class osiam (
         war { 'osiam-server':
             ensure  => $osiam::ensure,
             version => $osiam::version,
+            id      => $osiam::id,
             path    => $osiam::webappsdir,
             owner   => $osiam::owner,
             group   => $osiam::group,
