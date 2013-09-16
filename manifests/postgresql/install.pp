@@ -41,7 +41,7 @@ class osiam::postgresql::install inherits osiam::params {
         }
 
         Package[$osiam::params::package] -> File["${osiam::params::cpath}/postgresql.conf"] ->
-        File["${osiam::params::cpath}/pg_hba.conf"] -> Service[$osiam::params::service]  
+        File["${osiam::params::cpath}/pg_hba.conf"] -> Service[$osiam::params::service]
 
         File["${osiam::params::cpath}/postgresql.conf"] ~> Service[$osiam::params::service]
         File["${osiam::params::cpath}/pg_hba.conf"] ~> Service[$osiam::params::service]
@@ -54,13 +54,13 @@ class osiam::postgresql::install inherits osiam::params {
     package { $osiam::params::package:
         ensure  => $osiam::ensure,
     }
-    
+
     service { $osiam::params::service:
         ensure  => $osiam::service_ensure,
         enable  => $osiam::service_enable,
         status  => '/bin/ps ax | /bin/grep postgres | /bin/grep -v grep',
     }
-    
+
     file { "${osiam::params::cpath}/postgresql.conf":
         ensure	=> $osiam::ensure,
         mode	=> '0644',
@@ -68,7 +68,7 @@ class osiam::postgresql::install inherits osiam::params {
         group	=> 'postgres',
         content	=> template("osiam/postgresql_${::operatingsystem}.conf.erb"),
     }
-    
+
     file { "${osiam::params::cpath}/pg_hba.conf":
         ensure	=> $osiam::ensure,
         mode    => '0644',
@@ -76,7 +76,7 @@ class osiam::postgresql::install inherits osiam::params {
         group   => 'postgres',
         content => template('osiam/pg_hba.conf.erb'),
     }
-    
+
     firewall { '100 postgresql':
         action  => accept,
         dport   => '5432',

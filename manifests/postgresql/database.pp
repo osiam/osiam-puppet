@@ -41,7 +41,7 @@ class osiam::postgresql::database inherits osiam::params {
                         /bin/grep ${osiam::dbname}",
             require => Class['osiam::postgresql::user'],
         }
-    } else { 
+    } else {
         exec { "dropdatabase_${osiam::dbname}":
             command => "/usr/bin/psql -U postgres -c \"DROP DATABASE ${osiam::dbname};\"",
             onlyif  => "/usr/bin/psql -U postgres -c \

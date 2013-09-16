@@ -22,7 +22,7 @@
 class osiam::tomcat::config inherits osiam::params {
     $shared_loader  = $osiam::homedir
     $pass           = $osiam::params::tomcat_keyPass
-   
+
     file { 'catalina.properties':
         ensure  => $osiam::ensure,
         path    => "${osiam::params::tomcat_conf_path}/catalina.properties",

@@ -61,6 +61,4 @@ class osiam::params {
             fail("Unsupported operatingsystem: ${::operatingsystem}")
         }
     }
-    
-    
 }

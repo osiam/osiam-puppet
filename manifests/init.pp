@@ -42,7 +42,7 @@
 #   Kevin Viola Schmitz <k.schmitz@tarent.de>
 #
 class osiam (
-    $version,  
+    $version,
     $id             = undef,
     $ensure         = present,
     $homedir        = '/etc/osiam',
@@ -157,7 +157,7 @@ class osiam (
     class { 'install':
         stage => 'install',
     }
-    class { 'config': 
+    class { 'config':
         stage => 'main',
     }
     class { 'deploy':
