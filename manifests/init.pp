@@ -106,7 +106,7 @@ class osiam (
             require => File[$osiam::homedir],
         }
 
-        war { 'osiam-server':
+        war { 'osiam-auth-server':
             ensure  => $osiam::ensure,
             version => $osiam::version,
             id      => $osiam::id,
@@ -116,8 +116,18 @@ class osiam (
             require => File['osiam.properties'],
         }
 
+        war { 'osiam-resource-server':
+            ensure  => $osiam::ensure,
+            version => $osiam::version,
+            id      => $osiam::id,
+            path    => $osiam::webappsdir,
+            owner   => $osiam::owner,
+            group   => $osiam::group,
+            require => File['osiam.properties'],
+        }
 
-        dbschema { 'osiam-server':
+        # Note: only the resource server connects to the database
+        dbschema { 'osiam-resource-server':
             ensure        => $osiam::ensure,
             artifactpath  => $osiam::webappsdir,
             osiampath     => $osiam::homedir,
@@ -126,7 +136,7 @@ class osiam (
             dbuser        => $osiam::dbuser,
             dbpassword    => $osiam::dbpassword,
             dbforceschema => $osiam::dbforceschema,
-            require       => War['osiam-server'],
+            require       => War['osiam-resource-server'],
         }
 
         $dbconnection = {
@@ -138,7 +148,7 @@ class osiam (
 
         Osiamclient <<| tag == "${osiam::client_tag}" |>> {
             dbconnection => $dbconnection,
-            require      => Dbschema['osiam-server'],
+            require      => Dbschema['osiam-resource-server'],
             notify       => Service[$osiam::tomcatservice],
         }
 
