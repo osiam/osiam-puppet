@@ -12,8 +12,126 @@ Puppet::Type.type(:war).provide(:war) do
     include Puppet::Util::Execution
     include Puppet::Util::Warnings
 
+    def path
+        @path = @resource[:path]
+    end
+
+    def artifactid
+        @artifactid = @resource[:artifactid]
+    end
+
     def artifact
-        @resource[:path] + '/' + @resource[:artifactid] + '.war'
+        self.path + '/' + self.artifactid + '.war'
+    end
+
+    def version
+        @version = @resource[:version]
+    end
+
+    def snapshotRepository?
+        self.version =~ /^.*-SNAPSHOT$/ ? true : false
+    end
+
+    def repository
+        @repository = 'http://maven-repo.evolvis.org'
+    end
+
+    def repositoryUrl
+        type = self.snapshotRepository? ? 'snapshots' : 'releases'
+        @repositoryUrl = self.repository + '/' + type
+    end
+
+    def groupid
+        @groupid = 'org/osiam'
+    end
+
+    def downloadMavenMetadata
+        debug "#{self.artifactid}: Downloading maven-metadata.xml"
+        %x{wget -O maven-metadata.xml #{self.repositoryUrl}/#{self.groupid}/#{self.artifactid}/#{self.version}/maven-metadata.xml 2>&1}
+        raise Puppet::Error, "Failed to download maven-metadata.xml: #{output}" if $?.exitstatus != 0
+    end
+
+    def getIdFromMavenMetadata
+            downloadMavenMetadata
+            debug "#{self.artifactid}: Extracting information from maven-metadata.xml."
+            file        = File.new('./maven-metadata.xml')
+            mvnmd       = Document.new(file)
+            snapshot    = mvnmd.root.elements['versioning'].elements['snapshot']
+            timestamp   = snapshot.elements['timestamp'].text
+            buildnumber = snapshot.elements['buildNumber'].text
+            timestamp + '-' + buildnumber
+    end
+
+    def id
+        @id = @resource[:id].nil? ? self.getIdFromMavenMetadata : @resource[:id]
+    end
+
+    def latestArtifactSnapshot
+        versionshort            = self.version.sub(/^(.*)-SNAPSHOT$/,'\1')
+        latestArtifactSnapshot  = "#{self.repositoryUrl}/#{self.groupid}/#{self.artifactid}/#{self.version}/#{self.artifactid}"
+        latestArtifactSnapshot += "-#{versionshort}-#{self.id}.war"
+    end
+
+    def getRemoteArtifact
+        if self.snapshotRepository?
+            debug "#{self.artifactid}: Snapshot version."
+            return latestArtifactSnapshot
+        else
+            debug "#{self.artifactid}: Release version."
+            remoteartifact = "#{self.repositoryUrl}/#{self.groupid}/#{self.artifactid}/#{self.version}/#{self.artifactid}-#{self.version}.war"
+            return remoteartifact
+        end
+    end
+
+    def remoteArtifact
+        @remoteArtifact ||= self.getRemoteArtifact
+    end
+
+    def getTargetMd5
+        debug "#{@artifactid}: Remote artifact #{self.remoteArtifact}."
+        debug "#{@artifactid}: downloading artifact md5sum."
+        md5sum = %x{wget -qO- #{self.remoteArtifact}.md5}
+        raise Puppet::Error, "Failed to download md5file: #{md5sum}" if $?.exitstatus != 0
+        md5sum
+    end
+
+    def localAndRemoteArtifactMd5Equal?
+        localmd5    = Digest::MD5.hexdigest(File.read(self.artifact))
+        remotemd5   = self.getTargetMd5
+
+        debug "#{self.artifactid}: local file: #{localmd5}"
+        debug "#{self.artifactid}: remote file: #{remotemd5}"
+        localmd5 == remotemd5 ? true : false
+    end
+
+    def exists?
+        if File.exists?(self.artifact)
+            debug "#{self.artifactid}: Artifact exists. Comparing md5sum."
+            localAndRemoteArtifactMd5Equal?
+        else
+            debug "#{self.artifactid}: Artifact doesn't exist."
+            return false
+        end
+    end
+
+    def artifactOwner
+        @owner = @resource[:owner].nil? || @resource[:owner].empty? ? "root" : @resource[:owner]
+    end
+
+    def artifactGroup
+        @group = @resource[:group].nil? || @resource[:group].empty? ? "root" : @resource[:group]
+    end
+
+    def setArtifactPermission
+        self.owner= self.artifactOwner
+        self.group= self.artifactGroup
+    end
+
+    def create
+        debug "#{self.artifactid}: Downloading artifact '#{self.remoteArtifact}'."
+        output = %x{wget -qO #{self.artifact} #{self.remoteArtifact}}
+        raise Puppet::Error, "Failed to download artifact: #{output}" if $?.exitstatus != 0
+        self.setArtifactPermission
     end
 
     # Function to get file owner.
@@ -23,12 +141,11 @@ Puppet::Type.type(:war).provide(:war) do
     end
     # Function to enforce file owner.
     def owner=(owner)
-        owner = @resource[:owner]
-
+        debug "#{self.artifactid}: Changing owner to '#{self.artifactOwner}'."
         begin
-            File.chown(Etc.getpwnam(owner).uid,nil,self.artifact)
+            File.chown(Etc.getpwnam(self.owner).uid,nil,self.artifact)
         rescue => detail
-            raise Puppet::Error, "Failed to set owner to '#{owner}': #{detail}"
+            raise Puppet::Error, "Failed to set owner to '#{self.owner}': #{detail}"
         end
     end
 
@@ -40,30 +157,11 @@ Puppet::Type.type(:war).provide(:war) do
 
     # Function to enforce file group.
     def group=(group)
-        group = @resource[:group]
-
+        debug "#{self.artifactid}: Changing group to '#{self.artifactGroup}'."
         begin
-            File.chown(nil,Etc.getgrnam(group).gid,self.artifact)
+            File.chown(nil,Etc.getgrnam(self.group).gid,self.artifact)
         rescue => detail
-            raise Puppet::Error, "Failed to set group to '#{group}': #{detail}"
-        end
-    end
-
-    # Function to create file.
-    # Will be called if ensure is set to 'present'.
-    def create
-        path        = @resource[:path]
-        owner       = @resource[:owner].nil? || @resource[:owner].empty? ? "root" : @resource[:owner]
-        group       = @resource[:group].nil? || @resource[:group].empty? ? "root" : @resource[:group]
-
-        output = %x{wget -qO #{self.artifact} #{@remoteartifact}}
-        raise Puppet::Error, "Failed to download artifact: #{output}" if $?.exitstatus != 0
-
-        # Change artifact permission
-        begin
-            File.chown(Etc.getpwnam(owner).uid,Etc.getgrnam(group).gid,self.artifact)
-        rescue => detail
-            raise Puppet::Error, "Failed to set group to '#{group}': #{detail}"
+            raise Puppet::Error, "Failed to set group to '#{self.group}': #{detail}"
         end
     end
 
@@ -72,83 +170,5 @@ Puppet::Type.type(:war).provide(:war) do
     def destroy
         File.delete(self.artifact)
     end
-
-    def placeholdsetter
-        @version        = @resource[:version]
-        @artifactid     = @resource[:artifactid]
-        @path           = @resource[:path]
-        @groupid        = 'org/osiam'
-        @repository     = 'http://maven-repo.evolvis.org'
-        @remoteartifact = self.remoteArtifact
-    end
-
-    # Function to check if file exists.
-    # In this case it will also check its md5sum and
-    # compare it to the newest artifact
-    # (of the same version) in the repository.
-    def exists?
-        placeholdsetter
-
-        if File.exists?("#{@path}/#{@artifactid}.war")
-            debug "#{@artifactid}: Artifact exists. Comparing md5sum."
-            # Get md5sum of local and remote artifact and compare
-            localmd5    = Digest::MD5.hexdigest(File.read("#{@path}/#{@artifactid}.war"))
-            remotemd5   = getTargetMd5
-
-            debug "#{@artifactid}: local file: #{localmd5}"
-            debug "#{@artifactid}: remote file: #{remotemd5}"
-            return localmd5 == remotemd5 ? true : false
-        else
-            debug "#{@artifactid}: Artifact doesn't exist."
-            return false
-        end
-    end
-
-    def getTargetMd5
-        debug "#{@artifactid}: Remote artifact #{@remoteartifact}."
-        debug "#{@artifactid}: downloading artifact md5sum."
-        md5sum = %x{wget -qO- #{@remoteartifact}.md5}
-        raise Puppet::Error, "Failed to download md5file: #{md5sum}" if $?.exitstatus != 0
-
-        return md5sum
-    end
-
-    def remoteArtifact
-        if @version =~ /^.*-SNAPSHOT$/
-            debug "#{@artifactid}: Snapshot version."
-            repository = @repository + '/snapshots'
-
-            # Get timestamp and buildnumber of most current snapshot release if id was not given
-            if @resource[:id].nil?
-                debug "#{@artifactid}: No id given. Extracting information from maven-metadata.xml."
-                # Download maven-metadata.xml
-                %x{wget -O maven-metadata.xml #{repository}/#{@groupid}/#{@artifactid}/#{@version}/maven-metadata.xml 2>&1}
-                raise Puppet::Error, "Failed to download maven-metadata.xml: #{output}" if $?.exitstatus != 0
-
-                # Extract latest build timestamp and buildnumber
-                file        = File.new('./maven-metadata.xml')
-                mvnmd       = Document.new(file)
-                snapshot    = mvnmd.root.elements['versioning'].elements['snapshot']
-                timestamp   = snapshot.elements['timestamp'].text
-                buildnumber = snapshot.elements['buildNumber'].text
-                id          = timestamp + '-' + buildnumber
-                debug "#{@artifactid}: id: #{id}"
-            else
-                debug "#{@artifactid}: id given: #{id}."
-                id = @resource[:id]
-            end
-
-            versionshort    = @version.sub(/^(.*)-SNAPSHOT$/,'\1')
-            remoteartifact  = "#{repository}/#{@groupid}/#{@artifactid}/#{@version}/#{@artifactid}"
-            remoteartifact += "-#{versionshort}-#{id}.war"
-
-            return remoteartifact
-        else
-            debug "#{@artifactid}: Release version."
-            repository = @repository + '/releases'
-            remoteartifact = "#{repository}/#{@groupid}/#{@artifactid}/#{@version}/#{@artifactid}-#{@version}.war"
-
-            return remoteartifact
-        end
-    end
 end
+
