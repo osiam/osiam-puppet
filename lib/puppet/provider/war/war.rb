@@ -143,6 +143,12 @@ Puppet::Type.type(:war).provide(:war) do
             remoteartifact += "-#{versionshort}-#{id}.war"
 
             return remoteartifact
+        else
+            debug "#{@artifactid}: Release version."
+            repository = @repository + '/releases'
+            remoteartifact = "#{repository}/#{@groupid}/#{@artifactid}/#{@version}/#{@artifactid}-#{@version}.war"
+
+            return remoteartifact
         end
     end
 end
